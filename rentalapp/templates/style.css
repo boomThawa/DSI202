@@ -1,0 +1,18 @@
+body {
+    background: rgb(0, 0, 0);
+    color: black;
+    font-family: sans-serif;
+  }
+  
+  a {
+    color: #e91e63; /* pink */
+  }
+  
+  button, .btn {
+    background: #070e07;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+  }
+  

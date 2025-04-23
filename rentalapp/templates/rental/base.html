@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MindVibe Fashion Rental</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Unbounded', sans-serif;
+  }
+</style>
+
+</head>
+
+<body class="bg-white text-gray-900">
+
+  <!-- Navbar -->
+  <nav class="bg-white text-gray-900 shadow-md sticky top-0 z-50 border-b border-gray-300">
+    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+      <div class="flex items-center space-x-8">
+        <span class="text-2xl font-bold text-black uppercase tracking-wide">MindVibe</span>
+        <a href="{% url 'home' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Studio</a>
+        <a href="{% url 'product_list' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Drop</a>
+        <a href="{% url 'category_list' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Capsules</a>
+        <a href="{% url 'trend_list' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Movement</a>
+        <a href="{% url 'how_to_rent' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Ritual</a>
+        <a href="{% url 'account' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Vault</a>
+      </div>
+      <div class="flex items-center space-x-4">
+        <form action="{% url 'outfit_search' %}" method="get" class="flex items-center space-x-2">
+          <input type="text" name="q" class="p-2 border border-gray-300 rounded-md bg-gray-100 placeholder-gray-500 text-sm"
+            placeholder="Find your fit..." />
+          <button type="submit" class="text-pink-500 text-lg">🔍</button>
+        </form>
+        <a href="{% url 'cart' %}" class="text-gray-900 hover:text-pink-500 text-xl">🛒</a>
+        <a href="{% url 'wishlist' %}" class="text-gray-900 hover:text-pink-500 text-xl">❤️</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Banner -->
+  <section class="bg-gradient-to-b from-white via-zinc-50 to-white text-gray-900 min-h-screen flex items-center justify-center text-center">
+    <div class="px-8 py-20">
+      <h1 class="text-7xl font-extrabold tracking-tight leading-tight mb-6 uppercase text-black drop-shadow-lg">
+        Rent The Rare
+      </h1>
+      <p class="text-lg mb-10 text-zinc-600 max-w-xl mx-auto leading-relaxed font-light">
+        Curated streetwear rotations. No commitment. Full statement.
+      </p>
+      <a href="{% url 'product_list' %}"
+        class="px-8 py-3 border-2 border-pink-500 text-pink-500 font-bold rounded-full hover:bg-pink-500 hover:text-white shadow transition duration-300 uppercase tracking-wide">
+        Enter the Drop
+      </a>
+    </div>
+  </section>
+  
+
+  <!-- Featured Products Section -->
+  <section class="max-w-7xl mx-auto px-4 py-20">
+    <h2 class="text-4xl font-bold mb-12 text-center text-gray-900 uppercase">This Week’s Drop</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-10">
+      {% for product in featured_products %}
+      <a href="{% url 'product_detail' product.pk %}" class="group relative hover:scale-105 transition duration-300">
+        <div class="aspect-w-1 aspect-h-1 bg-gray-100 rounded-xl shadow overflow-hidden">
+          <img src="{% static 'rental/image/Winter-Vacation.png' %}" alt="{{ product.name }}" class="object-cover w-full h-full" />
+        </div>
+        <div class="mt-4 text-center">
+          <p class="text-md font-semibold tracking-tight text-gray-900">{{ product.name }}</p>
+          <p class="text-sm text-pink-500 font-medium">฿{{ product.price }} / Day</p>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Categories Section -->
+  <section class="bg-gray-100 py-20">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-3xl font-bold text-pink-500 uppercase">Capsules</h2>
+        <a href="{% url 'category_list' %}" class="text-pink-600 hover:underline text-sm font-medium">See All →</a>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+        <a href="{% url 'category_list' %}" class="hover:scale-105 transition">
+          <img src="{% static 'rental/image/Accessories.png' %}" class="mx-auto rounded-full" alt="Accessories" />
+          <p class="mt-2 text-gray-900">Accessories</p>
+        </a>
+        <a href="{% url 'category_list' %}" class="hover:scale-105 transition">
+          <img src="{% static 'rental/image/Party-Night.png' %}" class="mx-auto rounded-full" alt="Party Night" />
+          <p class="mt-2 text-gray-900">Party Night</p>
+        </a>
+        <a href="{% url 'category_list' %}" class="hover:scale-105 transition">
+          <img src="{% static 'rental/image/Matching-Set.png' %}" class="mx-auto rounded-full" alt="Matching Set" />
+          <p class="mt-2 text-gray-900">Matching Set</p>
+        </a>
+        <a href="{% url 'category_list' %}" class="hover:scale-105 transition">
+          <img src="{% static 'rental/image/Winter-Vacation.png' %}" class="mx-auto rounded-full" alt="Winter Vacation" />
+          <p class="mt-2 text-gray-900">Winter Vacation</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-white text-neutral-900 py-16 mt-20 border-t border-zinc-200">
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-3 gap-10">
+      <div>
+        <h4 class="text-xl font-bold uppercase tracking-wide mb-4 text-black">MindVibe</h4>
+        <p class="text-sm text-zinc-500 leading-relaxed">
+          Where street meets style — premium rentals with statement energy.
+        </p>
+      </div>
+      <div>
+        <h4 class="text-xl font-bold uppercase mb-4 text-black">Explore</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" class="hover:text-pink-500 transition">Drop</a></li>
+          <li><a href="#" class="hover:text-pink-500 transition">Capsules</a></li>
+          <li><a href="#" class="hover:text-pink-500 transition">Ritual</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-xl font-bold uppercase mb-4 text-black">Connect</h4>
+        <p class="text-sm text-zinc-500">Line: @mindvibe</p>
+        <p class="text-sm text-zinc-500">Email: hello@mindvibe.com</p>
+        <div class="mt-4 flex space-x-4">
+          <a href="#" class="hover:text-pink-500 transition">IG</a>
+          <a href="#" class="hover:text-pink-500 transition">TikTok</a>
+          <a href="#" class="hover:text-pink-500 transition">Pinterest</a>
+        </div>
+      </div>
+    </div>
+    <div class="text-center text-xs text-zinc-400 mt-12">
+      © 2025 MindVibe — All styles, all vibes.
+    </div>
+  </footer>
+  
+
+</body>
+
+</html>

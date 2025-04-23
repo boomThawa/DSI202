@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ค้นหาชุด | MindVibe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-white text-gray-800">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="text-2xl font-bold text-pink-600">MindVibe</div>
+            <div class="space-x-4">
+                <a href="{% url 'home' %}" class="text-gray-700 hover:text-pink-500">หน้าแรก</a>
+                <a href="{% url 'product_list' %}" class="text-gray-700 hover:text-pink-500">สินค้า</a>
+                <a href="{% url 'category_list' %}" class="text-gray-700 hover:text-pink-500">หมวดหมู่</a>
+                <a href="{% url 'trend_list' %}" class="text-gray-700 hover:text-pink-500">เทรนด์</a>
+                <a href="{% url 'how_to_rent' %}" class="text-gray-700 hover:text-pink-500">วิธีการเช่า</a>
+                <a href="{% url 'account' %}" class="text-gray-700 hover:text-pink-500">บัญชีของฉัน</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Search Content -->
+    <div class="max-w-7xl mx-auto px-4 py-10 bg-white">
+        <form method="get" action="{% url 'outfit_search' %}" class="mb-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <input 
+                type="text" 
+                name="q" 
+                placeholder="ค้นหาชุดที่คุณสนใจ..." 
+                value="{{ request.GET.q }}" 
+                class="w-full sm:w-96 px-4 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-400 shadow-sm"
+            >
+            <button type="submit" class="bg-pink-500 text-white px-6 py-3 rounded-full hover:bg-pink-600 transition">
+                ค้นหา
+            </button>
+        </form>
+
+        {% if results %}
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">ผลการค้นหา: "{{ request.GET.q }}"</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                {% for outfit in results %}
+                    <div class="bg-white shadow-lg rounded-2xl overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-xl">
+                        <img src="{{ outfit.image.url }}" alt="{{ outfit.name }}" class="w-full h-64 object-cover">
+                        <div class="p-5 flex flex-col justify-between h-full">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800 mb-1">{{ outfit.name }}</h3>
+                                <p class="text-gray-600 text-sm mb-2">{{ outfit.description|truncatewords:15 }}</p>
+                                <p class="text-pink-600 font-bold text-lg">{{ outfit.price }} บาท</p>
+                            </div>
+                            <div class="mt-4 flex justify-between items-center">
+                                <a href="{% url 'product_detail' outfit.pk %}" class="text-sm text-pink-500 hover:underline">ดูรายละเอียด</a>
+                                <a href="#" class="bg-pink-500 text-white text-sm px-4 py-2 rounded-full hover:bg-pink-600 transition">เช่าเลย</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-20">
+                <img src="https://cdn-icons-png.flaticon.com/512/2748/2748558.png" alt="no results" class="w-32 h-32 mx-auto mb-6 opacity-80">
+                <h2 class="text-xl text-gray-600">สินค้ากำลังมาเร็วๆ นี้ 🎉</h2>
+                <p class="text-gray-500 mt-2">ลองค้นหาด้วยคำอื่น หรือดูสินค้าจากหมวดหมู่อื่น</p>
+            </div>
+        {% endif %}
+    </div>
+
+</body>
+
+</html>
