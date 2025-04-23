@@ -4,6 +4,5 @@ db.sqlite3
 .env
 /staticfiles/
 /media/
-/venv/
 /.idea/
 /*.log
