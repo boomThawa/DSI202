@@ -8,12 +8,11 @@ from .models import Product, Outfit, Trend
 from .models import Product  # เพิ่มบรรทัดนี้เพื่อ import โมเดล Product
 from django.db import models
 
-
 def home(request):
-    # ใช้ Product.objects.filter() เพื่อกรองสินค้าที่มีการตั้งค่าเป็น featured
-    
-    featured_products = Product.objects.all()[:3]
+    # ดึงสินค้าที่เป็น Featured
+    featured_products = Product.objects.filter(is_featured=True)[:3]
 
+    # รูปภาพสำหรับแกลเลอรี
     gallery_images = [
         "1.1.png",
         "Accessories.png",
@@ -23,6 +22,7 @@ def home(request):
         "Unigam-BEBBY-TOP.png"
     ]
 
+    # ส่งข้อมูลไปยัง Template
     context = {
         'welcome_message': 'Welcome to the Fashion Rental Platform!',
         'featured_products': featured_products,
@@ -107,10 +107,13 @@ def return_outfit(request):
 # Mockup data
 # Mockup data for the product
 
-
+from django.shortcuts import render, get_object_or_404
+from .models import Product
 
 def product_detail(request, product_id):
-    product = get_object_or_404(Product, pk=product_id)
+    # ดึงข้อมูลสินค้า
+    product = get_object_or_404(Product, id=product_id)
+    # ส่งข้อมูลไปยัง Template
     return render(request, 'rental/product_detail.html', {'product': product})
 
 

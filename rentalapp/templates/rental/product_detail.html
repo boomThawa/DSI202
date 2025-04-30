@@ -21,7 +21,8 @@
                 <span class="text-xl font-bold text-pink-600">MindVibe</span>
                 <a href="{% url 'home' %}" class="text-gray-700 hover:text-pink-500 transition">หน้าแรก</a>
                 <a href="{% url 'product_list' %}" class="text-gray-700 hover:text-pink-500 transition">สินค้า</a>
-                <!-- ลิงค์อื่นๆ -->
+                <a href="{% url 'category_list' %}" class="text-gray-700 hover:text-pink-500 transition">หมวดหมู่</a>
+                <a href="{% url 'account' %}" class="text-gray-700 hover:text-pink-500 transition">บัญชีของฉัน</a>
             </div>
         </div>
     </nav>
@@ -29,14 +30,18 @@
     <!-- Product Detail -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <!-- Product Image -->
             <div class="bg-white rounded-xl shadow-lg overflow-hidden">
                 <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-96 object-cover">
             </div>
+            <!-- Product Info -->
             <div class="space-y-6">
                 <h1 class="text-4xl font-bold text-gray-800">{{ product.name }}</h1>
                 <p class="text-lg text-gray-600">{{ product.description }}</p>
                 <p class="text-pink-600 text-2xl">{{ product.price }} บาท</p>
-                <a href="#" class="bg-pink-500 text-white py-2 px-6 rounded-full">เช่าเลย</a>
+                <a href="{% url 'cart' %}?product_id={{ product.id }}" class="bg-pink-500 text-white py-2 px-6 rounded-full hover:bg-pink-600 transition">
+                    เช่าเลย
+                </a>
             </div>
         </div>
     </div>

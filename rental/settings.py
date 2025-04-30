@@ -46,11 +46,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'rental.urls'
 
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'rental/rentalapp/templates'],  # เพิ่มเส้นทางนี้
+        'DIRS': [BASE_DIR / 'rentalapp/templates'],  # หรือ BASE_DIR / 'templates'
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -73,11 +72,11 @@ WSGI_APPLICATION = "rental.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'fashion_db',  # ชื่อฐานข้อมูล
-        'USER': 'fashion_user',  # ชื่อผู้ใช้
-        'PASSWORD': 'fashion_pass',  # รหัสผ่าน
-        'HOST': 'db',  # ชื่อบริการฐานข้อมูลใน docker-compose.yml
-        'PORT': '5432',  # พอร์ตที่ใช้
+        'NAME': 'fashion_db',          # ชื่อของฐานข้อมูล
+        'USER': 'fashion_user',        # ชื่อผู้ใช้ของฐานข้อมูล
+        'PASSWORD': 'fashion_pass',    # รหัสผ่านของฐานข้อมูล
+        'HOST': 'db',                  # ชื่อโฮสต์ของฐานข้อมูลใน Docker Compose
+        'PORT': '5432',                # พอร์ตของฐานข้อมูล
     }
 }
 
