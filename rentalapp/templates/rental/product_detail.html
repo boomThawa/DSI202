@@ -1,3 +1,6 @@
+{% load custom_tags %}
+<img src="{{ product.image.url }}" alt="{{ product.name }}">
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -9,6 +12,26 @@
     <style>
         body {
             font-family: 'Prompt', sans-serif;
+            background-color: #f9f9f9;
+        }
+
+        .rating span {
+            font-size: 1.25rem;
+            color: #ffcc00;
+        }
+
+        .product-status {
+            font-weight: bold;
+        }
+
+        .btn-disabled {
+            background-color: #e2e2e2;
+            cursor: not-allowed;
+        }
+
+        .hover-effect:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
@@ -32,16 +55,54 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
             <!-- Product Image -->
             <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-96 object-cover">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-96 object-cover">
+                {% else %}
+                    <img src="https://via.placeholder.com/400x400?text=No+Image" alt="No Image" class="w-full h-96 object-cover">
+                {% endif %}
             </div>
             <!-- Product Info -->
             <div class="space-y-6">
                 <h1 class="text-4xl font-bold text-gray-800">{{ product.name }}</h1>
                 <p class="text-lg text-gray-600">{{ product.description }}</p>
                 <p class="text-pink-600 text-2xl">{{ product.price }} บาท</p>
-                <a href="{% url 'cart' %}?product_id={{ product.id }}" class="bg-pink-500 text-white py-2 px-6 rounded-full hover:bg-pink-600 transition">
-                    เช่าเลย
-                </a>
+
+                <!-- คะแนนรีวิว -->
+                <div class="flex items-center space-x-2">
+                    <span class="text-yellow-500">
+                        {% for i in product.rating|times %}
+                            ★
+                        {% endfor %}
+                        {% for i in (5-product.rating)|times %}
+                            ☆
+                        {% endfor %}
+                    </span>
+                    <span class="text-gray-500">({{ product.review_count }} รีวิว)</span>
+                </div>
+                
+                <!-- จำนวนการเช่า -->
+                <p class="text-gray-600">เช่าแล้ว: {{ product.rent_count }} ครั้ง</p>
+
+                <!-- สถานะสินค้า -->
+                <p class="{% if product.available %}text-green-500{% else %}text-red-500{% endif %}">
+                    {% if product.available %}
+                        มีสินค้าให้เช่า
+                    {% else %}
+                        สินค้าหมด
+                    {% endif %}
+                </p>
+                
+                <!-- ปุ่มเช่า -->
+                {% if product.available %}
+                    <a href="{% url 'cart' %}?product_id={{ product.id }}" 
+                       class="bg-pink-500 text-white py-2 px-6 rounded-full hover:bg-pink-600 transition">
+                        เช่าเลย
+                    </a>
+                {% else %}
+                    <button disabled class="bg-gray-400 text-white py-2 px-6 rounded-full">
+                        สินค้าหมด
+                    </button>
+                {% endif %}
             </div>
         </div>
     </div>

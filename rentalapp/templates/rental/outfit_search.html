@@ -64,8 +64,30 @@
         {% else %}
             <div class="text-center py-20">
                 <img src="https://cdn-icons-png.flaticon.com/512/2748/2748558.png" alt="no results" class="w-32 h-32 mx-auto mb-6 opacity-80">
-                <h2 class="text-xl text-gray-600">สินค้ากำลังมาเร็วๆ นี้ 🎉</h2>
-                <p class="text-gray-500 mt-2">ลองค้นหาด้วยคำอื่น หรือดูสินค้าจากหมวดหมู่อื่น</p>
+                <h2 class="text-xl text-gray-600">ไม่พบผลการค้นหา</h2>
+                <p class="text-gray-500 mt-2">ลองค้นหาด้วยคำอื่น หรือดูสินค้าจาก <a href="{% url 'category_list' %}" class="text-pink-500 hover:underline">หมวดหมู่</a></p>
+            </div>
+            <!-- Featured Products -->
+            <div class="mt-10">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">สินค้ายอดนิยม</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                    {% for outfit in featured_outfits %}
+                        <div class="bg-white shadow-lg rounded-2xl overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-xl">
+                            <img src="{{ outfit.image.url }}" alt="{{ outfit.name }}" class="w-full h-64 object-cover">
+                            <div class="p-5 flex flex-col justify-between h-full">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-1">{{ outfit.name }}</h3>
+                                    <p class="text-gray-600 text-sm mb-2">{{ outfit.description|truncatewords:15 }}</p>
+                                    <p class="text-pink-600 font-bold text-lg">{{ outfit.price }} บาท</p>
+                                </div>
+                                <div class="mt-4 flex justify-between items-center">
+                                    <a href="{% url 'product_detail' outfit.pk %}" class="text-sm text-pink-500 hover:underline">ดูรายละเอียด</a>
+                                    <a href="#" class="bg-pink-500 text-white text-sm px-4 py-2 rounded-full hover:bg-pink-600 transition">เช่าเลย</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
         {% endif %}
     </div>

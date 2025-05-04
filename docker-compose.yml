@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   web:
     build: .
@@ -8,13 +9,20 @@ services:
       - db
     environment:
       - DEBUG=True
+      - POSTGRES_USER=fashion_user
+      - POSTGRES_PASSWORD=fashion_pass
+      - POSTGRES_DB=fashion_db
     networks:
       - default
     volumes:
-      - ./static:/app/static   # เพิ่มบรรทัดนี้
-      - ./media:/app/media
+      - ./static:/app/static   # แชร์ static files
+      - ./media:/app/media     # แชร์ media files
+      - ./wait-for-it.sh:/app/wait-for-it.sh # เพิ่ม wait-for-it.sh
     command: >
-      bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+      bash -c "
+      ./wait-for-it.sh db:5432 -- python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000
+      "
 
   db:
     image: postgres:14

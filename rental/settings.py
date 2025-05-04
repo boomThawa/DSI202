@@ -119,7 +119,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',  # โฟลเดอร์ static ที่เก็บไฟล์ในโปรเจ็กต์
+    BASE_DIR / 'rentalapp/static',  # พาธหลักที่เก็บไฟล์ Static (รวมพาธ rental/image)
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 # settings.py
