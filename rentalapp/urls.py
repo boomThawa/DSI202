@@ -5,7 +5,11 @@ from .views import ProfileView,cart
 urlpatterns = [
     # หน้าหลัก
     path('', views.home, name='home'),
-
+    path('', views.home, name='home'),
+    path('profile/', views.profile, name='profile'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    
     # ฟีเจอร์ผู้ใช้
     path('profile/', ProfileView.as_view(), name='profile'),
     path('wishlist/', views.wishlist, name='wishlist'),
