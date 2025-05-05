@@ -1,29 +1,6 @@
-{% extends "base.html" %}
-
-{% block title %}Checkout - Rent Your Style{% endblock %}
-
-{% block content %}
-<h1 class="text-3xl font-bold text-gray-900 mb-6">Checkout</h1>
-
-<form method="post" action="{% url 'process_checkout' %}">
-    {% csrf_token %}
-    <div class="mb-4">
-        <label for="name" class="block text-gray-600 mb-2">Full Name:</label>
-        <input type="text" id="name" name="name" required class="border rounded-lg p-2 w-full">
-    </div>
-    <div class="mb-4">
-        <label for="address" class="block text-gray-600 mb-2">Shipping Address:</label>
-        <textarea id="address" name="address" required class="border rounded-lg p-2 w-full"></textarea>
-    </div>
-    <div class="mb-4">
-        <label for="payment_method" class="block text-gray-600 mb-2">Payment Method:</label>
-        <select id="payment_method" name="payment_method" required class="border rounded-lg p-2 w-full">
-            <option value="credit_card">Credit Card</option>
-            <option value="paypal">PayPal</option>
-        </select>
-    </div>
-    <button type="submit" class="bg-pink-500 hover:bg-pink-600 text-white py-3 px-6 rounded-lg">
-        Confirm Order
-    </button>
-</form>
-{% endblock %}
+<h2 class="text-2xl font-bold mb-4">Checkout</h2>
+{% if product %}
+    <p>คุณกำลังเช่า <strong>{{ product.name }}</strong> ในราคา ฿{{ product.price }} / วัน</p>
+{% else %}
+    <p>ไม่มีสินค้าในรายการเช่า</p>
+{% endif %}

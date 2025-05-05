@@ -1,6 +1,9 @@
 from django.contrib import admin
-from .models import Category, Product, Outfit, Order, Return, Trend
+from django.contrib.auth.models import User
+from .models import Category, Product, Outfit, Order, Return, Trend, UserProfile
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
+# 1. Register Category, Product, Outfit, Order, Return, Trend
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name',)
@@ -33,7 +36,19 @@ class TrendAdmin(admin.ModelAdmin):
     list_display = ('title', 'created_at')
     search_fields = ('title',)
 
-from django.contrib.auth.decorators import login_required
-@login_required
-def profile(request):
-    return render(request, 'rental/profile.html')
+# 2. เพิ่มการจัดการ UserProfile
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ['user', 'phone_number', 'address']
+
+# 3. สร้าง Inline สำหรับ UserProfile
+class UserProfileInline(admin.StackedInline):
+    model = UserProfile
+    can_delete = False
+
+# 4. สร้าง Custom User Admin
+class CustomUserAdmin(BaseUserAdmin):
+    inlines = [UserProfileInline]
+
+# 5. Unregister และ Register ใหม่สำหรับ User
+admin.site.unregister(User)
+admin.site.register(User, CustomUserAdmin)

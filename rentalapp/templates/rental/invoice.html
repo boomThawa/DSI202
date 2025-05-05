@@ -1,0 +1,17 @@
+<h1 class="text-2xl font-bold mb-4">ใบสรุปรายการเช่า</h1>
+<p class="mb-2">วันที่: {{ rental.rental_date|date:"d M Y H:i" }}</p>
+<p class="mb-2">ชื่อผู้ใช้: {{ rental.user.username }}</p>
+
+<ul class="divide-y divide-gray-300 mt-4">
+    {% for item in rental.items.all %}
+    <li class="py-2">
+        <p class="font-semibold">{{ item.product.name }}</p>
+        <p>฿{{ item.price_per_day }} x {{ item.rent_days }} วัน = ฿{{ item.total }}</p>
+    </li>
+    {% endfor %}
+</ul>
+
+<p class="mt-4 font-bold text-xl">รวมทั้งหมด: ฿{{ rental.total_price }}</p>
+<a href="{% url 'home' %}" class="mt-6 inline-block bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700">
+    กลับสู่หน้าแรก
+</a>

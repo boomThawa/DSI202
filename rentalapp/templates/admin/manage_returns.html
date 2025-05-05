@@ -1,0 +1,13 @@
+<h2 class="text-xl font-bold mb-4">คำขอคืนสินค้าทั้งหมด</h2>
+{% for rental in pending_returns %}
+    <div class="bg-white p-4 shadow rounded mb-3">
+        <p>ผู้ใช้: {{ rental.user.username }}</p>
+        <p>สินค้า: {{ rental.product.name }}</p>
+        <div class="mt-2 space-x-2">
+            <a href="{% url 'approve_return' rental.id %}" class="bg-green-500 text-white px-4 py-1 rounded">อนุมัติ</a>
+            <a href="{% url 'reject_return' rental.id %}" class="bg-red-500 text-white px-4 py-1 rounded">ปฏิเสธ</a>
+        </div>
+    </div>
+{% empty %}
+    <p>ยังไม่มีคำขอคืนสินค้า</p>
+{% endfor %}

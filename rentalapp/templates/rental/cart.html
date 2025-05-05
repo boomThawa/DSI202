@@ -1,44 +1,29 @@
-{% extends "base.html" %}
-
-{% block title %}Cart - Rent Your Style{% endblock %}
-
-{% block content %}
-<h1 class="text-3xl font-bold text-gray-900 mb-6">Your Cart</h1>
-
-{% if cart_details %}
-<div class="grid grid-cols-1 gap-6">
-    {% for item in cart_details %}
-    <div class="flex justify-between items-center border-b border-gray-200 py-4">
-        <div class="flex items-center space-x-4">
-            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="w-16 h-16 object-cover rounded">
+<h2 class="text-2xl font-bold mb-4">Your Cart</h2>
+<ul class="space-y-4">
+    {% for item in cart.items.all %}
+    <li class="border p-4 rounded-md bg-white shadow">
+        <div class="flex justify-between items-center">
             <div>
-                <h2 class="text-lg font-semibold">{{ item.product.name }}</h2>
-                <p class="text-gray-600">฿{{ item.product.price }} / Day</p>
-                <p class="text-gray-500 text-sm">Days: {{ item.rental_days }}</p>
+                <p class="font-semibold">{{ item.product.name }}</p>
+                <form action="{% url 'update_rent_days' item.id %}" method="POST" class="mt-2 flex items-center space-x-2">
+                    {% csrf_token %}
+                    <label for="rent_days_{{ item.id }}">Days:</label>
+                    <input type="number" name="rent_days" id="rent_days_{{ item.id }}" value="{{ item.rent_days }}" min="1"
+                        class="border border-gray-300 px-2 py-1 rounded w-20">
+                    <button type="submit" class="text-blue-600 hover:underline">Update</button>
+                </form>
+                <p class="text-gray-600 mt-1">Total: ฿{{ item.total_price }}</p>
             </div>
+            <a href="{% url 'remove_from_cart' item.id %}"
+               class="text-red-500 hover:text-red-700 font-semibold">Remove</a>
         </div>
-        <div class="flex items-center space-x-4">
-            <p class="text-lg text-gray-800">฿{{ item.item_total_price }}</p>
-            <a href="{% url 'remove_from_cart' item.product.id %}" class="text-pink-500 font-semibold hover:underline">Remove</a>
-        </div>
-    </div>
+    </li>
+    {% empty %}
+    <li class="text-gray-500">ยังไม่มีสินค้าในตะกร้า</li>
     {% endfor %}
-</div>
+</ul>
 
-<div class="mt-6 p-6 bg-gray-100 rounded-lg">
-    <h2 class="text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
-    <div class="flex justify-between items-center">
-        <p class="text-lg text-gray-600">Total:</p>
-        <p class="text-lg font-bold text-gray-900">฿{{ total_price }}</p>
-    </div>
-    <div class="mt-6">
-        <a href="{% url 'checkout' %}" class="block w-full bg-pink-500 hover:bg-pink-600 text-white py-3 text-center rounded-lg">
-            Proceed to Checkout
-        </a>
-    </div>
-</div>
-{% else %}
-<p class="text-gray-600">Your cart is empty.</p>
-<a href="{% url 'product_list' %}" class="text-pink-500 font-semibold hover:underline">Browse Products</a>
-{% endif %}
-{% endblock %}
+<p class="mt-6 font-bold text-lg">Total Price: ฿{{ cart.total_price }}</p>
+<a href="{% url 'checkout' %}" class="mt-4 inline-block bg-pink-500 text-white px-6 py-3 rounded hover:bg-pink-600">
+    Proceed to Checkout
+</a>

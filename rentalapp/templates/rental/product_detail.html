@@ -69,14 +69,22 @@
 
         <!-- Actions -->
         <div class="flex space-x-4">
-            <button class="flex-1 bg-gray-800 text-white py-3 rounded-lg shadow hover:bg-gray-700 transition">
-                Add to Cart
-            </button>
-            <button class="flex-1 bg-pink-500 text-white py-3 rounded-lg shadow hover:bg-pink-600 transition">
-                Rent Now
-            </button>
-        </div>
-    </div>
+            <!-- Add to Cart -->
+            <form method="post" action="{% url 'add_to_cart' product.id %}" class="flex-1">
+                {% csrf_token %}
+                <button type="submit" class="w-full bg-gray-800 text-white py-3 rounded-lg shadow hover:bg-gray-700 transition">
+                    Add to Cart
+                </button>
+            </form>
+        
+            <!-- Rent Now -->
+            <form method="post" action="{% url 'rent_now' product.id %}" class="flex-1">
+                {% csrf_token %}
+                <button type="submit" class="w-full bg-pink-500 text-white py-3 rounded-lg shadow hover:bg-pink-600 transition">
+                    Rent Now
+                </button>
+            </form>
+        </div>        
 </main>
 
 <!-- Footer -->
