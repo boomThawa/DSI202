@@ -1,18 +1,13 @@
-# views.py
-
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import DetailView, ListView
 from django.db.models import Q
 from django.http import Http404
+from django.contrib.auth.decorators import login_required
 from .models import Product, Outfit, Trend
-from .models import Product  # เพิ่มบรรทัดนี้เพื่อ import โมเดล Product
-from django.db import models
+from math import floor
 
 def home(request):
-    # ดึงสินค้าที่เป็น Featured
     featured_products = Product.objects.filter(is_featured=True)[:3]
-
-    # รูปภาพสำหรับแกลเลอรี
     gallery_images = [
         "1.1.png",
         "Accessories.png",
@@ -21,22 +16,22 @@ def home(request):
         "Sister-JINNY-TO.png",
         "Unigam-BEBBY-TOP.png"
     ]
-
-    # ส่งข้อมูลไปยัง Template
     context = {
         'welcome_message': 'Welcome to the Fashion Rental Platform!',
         'featured_products': featured_products,
         'gallery_images': gallery_images,
     }
-
     return render(request, 'rental/base.html', context)
 
+@login_required
+def profile(request):
+    return render(request, 'rental/profile.html', {'user': request.user})
 
+@login_required
 def wishlist(request):
-    # แสดงรายการสินค้าที่ถูกเพิ่มใน wishlist
-    return render(request, 'rental/wishlist.html')  # เปลี่ยนเป็นไฟล์ template ที่ต้องการ
+    # TODO: เพิ่ม logic ดึงข้อมูล wishlist ของผู้ใช้จากฐานข้อมูล
+    return render(request, 'rental/wishlist.html')
 
-# หน้าแสดงรายละเอียด Outfit
 class OutfitDetailView(DetailView):
     model = Outfit
     template_name = 'outfit_detail.html'
@@ -47,99 +42,34 @@ class OutfitDetailView(DetailView):
         if obj is None:
             raise Http404("Outfit not found")
         return obj
-    
-def about_us(request):
-    return render(request, 'rental/about_us.html')  # เปลี่ยนเป็นไฟล์ template ที่คุณต้องการ
 
-# ฟังก์ชันการแสดงตะกร้าสินค้า
+def about_us(request):
+    return render(request, 'rental/about_us.html')
+
+@login_required
 def cart(request):
     cart_items = request.session.get('cart', {})
     total_price = 0
-    cart_details = []  # รายละเอียดสินค้าที่จะแสดงในเทมเพลต
-    for product_id, quantity in cart_items.items():
+    cart_details = []
+
+    for product_id, details in cart_items.items():
         try:
             product = Product.objects.get(id=product_id)
-            item_total_price = product.price * quantity
+            quantity = details.get('quantity', 1)
+            rental_days = details.get('rental_days', 1)
+            item_total_price = product.price * quantity * rental_days
             total_price += item_total_price
             cart_details.append({
                 'product': product,
                 'quantity': quantity,
+                'rental_days': rental_days,
                 'item_total_price': item_total_price
             })
         except Product.DoesNotExist:
-            continue  # หากสินค้าไม่พบในฐานข้อมูล จะข้ามไป
-    return render(request, 'cart.html', {'cart_details': cart_details, 'total_price': total_price})
+            continue
 
+    return render(request, 'rental/cart.html', {'cart_details': cart_details, 'total_price': total_price})
 
-# ฟังก์ชันการค้นหา Outfit
-class OutfitSearchView(ListView):
-    model = Outfit
-    template_name = 'outfit_search.html'
-    context_object_name = 'outfits'
-
-    def get_queryset(self):
-        query = self.request.GET.get('q', '')
-        if query:
-            return Outfit.objects.filter(
-                Q(name__icontains=query) |
-                Q(description__icontains=query) |
-                Q(category__icontains=query)
-            )
-        return Outfit.objects.all()
-
-
-
-# ฟังก์ชันการชำระเงิน
-def checkout(request):
-    if request.method == "POST":
-        # ประมวลผลการชำระเงิน
-        process_checkout(request)
-        return redirect('checkout_complete')  # เปลี่ยนเส้นทางไปที่หน้า checkout complete
-    return render(request, 'checkout.html')
-
-
-# ฟังก์ชันคืนสินค้า
-def return_outfit(request):
-    return render(request, 'return.html', {'message': 'Return item form goes here'})
-
-
-# ฟังก์ชันแสดงรายละเอียดสินค้า
-# Mockup data
-# Mockup data for the product
-
-from django.shortcuts import render, get_object_or_404
-from .models import Product
-
-def product_detail(request, product_id):
-    # ดึงข้อมูลสินค้า
-    product = get_object_or_404(Product, id=product_id)
-    # ส่งข้อมูลไปยัง Template
-    return render(request, 'rental/product_detail.html', {'product': product})
-
-
-# ฟังก์ชันแสดงหมวดหมู่สินค้า
-def category_list(request):
-    categories = [
-        {"name": "ชุดเดรส", "image": "https://source.unsplash.com/100x100/?dress"},
-        {"name": "เสื้อ", "image": "https://source.unsplash.com/100x100/?shirt"},
-        {"name": "กระโปรง", "image": "https://source.unsplash.com/100x100/?skirt"},
-        {"name": "กางเกง", "image": "https://source.unsplash.com/100x100/?pants"},
-    ]
-    return render(request, 'rental/category_list.html', {'categories': categories})
-
-
-# ฟังก์ชันคำแนะนำการเช่า
-def how_to_rent(request):
-    return render(request, 'rental/how_to_rent.html')
-
-
-
-# ฟังก์ชันบัญชีผู้ใช้
-def account(request):
-    return render(request, 'rental/account.html')
-
-
-# ฟังก์ชันการค้นหาสินค้า
 def outfit_search(request):
     query = request.GET.get('q', '')
     results = []
@@ -152,23 +82,54 @@ def outfit_search(request):
         'query': query
     })
 
+def checkout(request):
+    if request.method == "POST":
+        # TODO: เพิ่ม logic สำหรับการประมวลผลการชำระเงิน
+        return redirect('checkout_complete')
+    return render(request, 'checkout.html')
+
+def return_outfit(request):
+    return render(request, 'return.html', {'message': 'Return item form goes here'})
+
+def product_detail(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    full_stars = [1] * floor(product.rating)
+    half_star = product.rating - floor(product.rating) >= 0.5
+    empty_stars = 5 - len(full_stars) - (1 if half_star else 0)
+    empty_stars = [1] * empty_stars
+
+    return render(request, 'rental/product_detail.html', {
+        'product': product,
+        'full_stars': full_stars,
+        'half_star': half_star,
+        'empty_stars': empty_stars
+    })
+
+def category_list(request):
+    categories = [
+        {"name": "ชุดเดรส", "image": "https://source.unsplash.com/100x100/?dress"},
+        {"name": "เสื้อ", "image": "https://source.unsplash.com/100x100/?shirt"},
+        {"name": "กระโปรง", "image": "https://source.unsplash.com/100x100/?skirt"},
+        {"name": "กางเกง", "image": "https://source.unsplash.com/100x100/?pants"},
+    ]
+    return render(request, 'rental/category_list.html', {'categories': categories})
+
+def how_to_rent(request):
+    return render(request, 'rental/how_to_rent.html')
+
+def account(request):
+    return render(request, 'rental/account.html')
 
 def product_list(request):
-    products = Product.objects.all()  # ดึงสินค้าทั้งหมดจากฐานข้อมูล
-
-    # ฟิลเตอร์ตามหมวดหมู่
+    products = Product.objects.all()
     category = request.GET.get('category')
     if category:
         products = products.filter(category_id=category)
-
-    # ฟิลเตอร์ตามคำค้นหา
     search_query = request.GET.get('search')
     if search_query:
         products = products.filter(name__icontains=search_query)
-
     return render(request, 'rental/product_list.html', {'products': products})
 
-# ฟังก์ชันแสดงเทรนด์
 def trend_list(request):
     trends = Trend.objects.all()
     return render(request, 'rental/trend_list.html', {'trends': trends})

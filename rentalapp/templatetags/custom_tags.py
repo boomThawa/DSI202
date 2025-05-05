@@ -1,10 +1,11 @@
 from django import template
+import math
 
 register = template.Library()
 
 @register.filter
-def times(value):
+def floor(value):
     try:
-        return range(int(value))
-    except ValueError:
-        return range(0)
+        return math.floor(value)
+    except (ValueError, TypeError):
+        return value

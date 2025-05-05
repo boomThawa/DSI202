@@ -30,4 +30,4 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/v0.6.1/dockerize
     rm dockerize-linux-amd64-v0.6.1.tar.gz
 
 # Wait for database to be ready and run the app
-CMD ["dockerize", "-wait", "tcp://db:5432", "-timeout", "30s", "gunicorn", "rental.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["dockerize", "-wait", "tcp://db:5432", "-timeout", "30s", "sh", "-c", "python manage.py migrate && gunicorn rental.wsgi:application --bind 0.0.0.0:8000"]

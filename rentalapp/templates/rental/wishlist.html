@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Wishlist - Rent Your Style{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold text-gray-900 mb-6">Your Wishlist</h1>
+<div>
+    {% for item in wishlist %}
+    <div class="flex justify-between items-center border-b border-gray-200 py-4">
+        <div class="flex items-center space-x-4">
+            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="w-16 h-16 object-cover rounded">
+            <div>
+                <h2 class="text-lg font-semibold">{{ item.product.name }}</h2>
+                <p class="text-gray-600">฿{{ item.product.price }} / Day</p>
+            </div>
+        </div>
+        <a href="#" class="text-pink-500 font-semibold">Remove</a>
+    </div>
+    {% empty %}
+    <p class="text-gray-600">Your wishlist is empty.</p>
+    {% endfor %}
+</div>
+{% endblock %}

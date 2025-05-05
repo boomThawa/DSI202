@@ -1,111 +1,90 @@
-{% load custom_tags %}
-<img src="{{ product.image.url }}" alt="{{ product.name }}">
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ product.name }} - MindVibe</title>
+    <title>{{ product.name }} - Rent Your Style</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Prompt', sans-serif;
-            background-color: #f9f9f9;
-        }
-
-        .rating span {
-            font-size: 1.25rem;
-            color: #ffcc00;
-        }
-
-        .product-status {
-            font-weight: bold;
-        }
-
-        .btn-disabled {
-            background-color: #e2e2e2;
-            cursor: not-allowed;
-        }
-
-        .hover-effect:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-gray-50 text-gray-800">
 
-    <!-- Navbar -->
-    <nav class="bg-white shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-            <div class="flex items-center space-x-4">
-                <span class="text-xl font-bold text-pink-600">MindVibe</span>
-                <a href="{% url 'home' %}" class="text-gray-700 hover:text-pink-500 transition">หน้าแรก</a>
-                <a href="{% url 'product_list' %}" class="text-gray-700 hover:text-pink-500 transition">สินค้า</a>
-                <a href="{% url 'category_list' %}" class="text-gray-700 hover:text-pink-500 transition">หมวดหมู่</a>
-                <a href="{% url 'account' %}" class="text-gray-700 hover:text-pink-500 transition">บัญชีของฉัน</a>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Product Detail -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <!-- Product Image -->
-            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                {% if product.image %}
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-96 object-cover">
-                {% else %}
-                    <img src="https://via.placeholder.com/400x400?text=No+Image" alt="No Image" class="w-full h-96 object-cover">
-                {% endif %}
-            </div>
-            <!-- Product Info -->
-            <div class="space-y-6">
-                <h1 class="text-4xl font-bold text-gray-800">{{ product.name }}</h1>
-                <p class="text-lg text-gray-600">{{ product.description }}</p>
-                <p class="text-pink-600 text-2xl">{{ product.price }} บาท</p>
-
-                <!-- คะแนนรีวิว -->
-                <div class="flex items-center space-x-2">
-                    <span class="text-yellow-500">
-                        {% for i in product.rating|times %}
-                            ★
-                        {% endfor %}
-                        {% for i in (5-product.rating)|times %}
-                            ☆
-                        {% endfor %}
-                    </span>
-                    <span class="text-gray-500">({{ product.review_count }} รีวิว)</span>
-                </div>
-                
-                <!-- จำนวนการเช่า -->
-                <p class="text-gray-600">เช่าแล้ว: {{ product.rent_count }} ครั้ง</p>
-
-                <!-- สถานะสินค้า -->
-                <p class="{% if product.available %}text-green-500{% else %}text-red-500{% endif %}">
-                    {% if product.available %}
-                        มีสินค้าให้เช่า
-                    {% else %}
-                        สินค้าหมด
-                    {% endif %}
-                </p>
-                
-                <!-- ปุ่มเช่า -->
-                {% if product.available %}
-                    <a href="{% url 'cart' %}?product_id={{ product.id }}" 
-                       class="bg-pink-500 text-white py-2 px-6 rounded-full hover:bg-pink-600 transition">
-                        เช่าเลย
-                    </a>
-                {% else %}
-                    <button disabled class="bg-gray-400 text-white py-2 px-6 rounded-full">
-                        สินค้าหมด
-                    </button>
-                {% endif %}
-            </div>
+<!-- Header -->
+<header class="bg-white shadow-md py-4">
+    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between">
+        <span class="text-2xl font-bold uppercase tracking-wide">Rent Your Style</span>
+        <div class="flex space-x-4">
+            <a href="{% url 'wishlist' %}" class="text-gray-800 hover:text-pink-500 font-semibold">Wishlist</a>
+            <a href="{% url 'profile' %}" class="text-gray-800 hover:text-pink-500 font-semibold">Profile</a>
+            <a href="{% url 'cart' %}" class="text-gray-800 hover:text-pink-500 font-semibold">Cart</a>
         </div>
     </div>
+</header>
+
+<!-- Product Section -->
+<main class="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-2 gap-12">
+    <!-- Left Column: Product Image -->
+    <div class="flex justify-center items-center">
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full max-w-md object-cover rounded-lg shadow-lg">
+    </div>
+
+    <!-- Right Column: Product Details -->
+    <div class="flex flex-col justify-between">
+        <!-- Product Information -->
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ product.name }}</h1>
+            <p class="text-gray-600 text-lg mb-4">{{ product.description }}</p>
+
+            <div class="mb-4">
+                <span class="text-lg text-gray-500">Available colors: </span>
+                <button class="w-8 h-8 rounded-full bg-black border-2 border-gray-300"></button>
+                <button class="w-8 h-8 rounded-full bg-red-500 border-2 border-gray-300"></button>
+            </div>
+
+            <div class="mb-4">
+                <label for="size" class="block text-gray-500 text-sm mb-1">Select your size:</label>
+                <select id="size" class="p-2 border border-gray-300 rounded-md w-full">
+                    <option>Small</option>
+                    <option>Medium</option>
+                    <option>Large</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <span class="text-lg text-gray-500">Rent duration:</span>
+                <div class="flex space-x-4 mt-2">
+                    <button class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100">3 Days</button>
+                    <button class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100">5 Days</button>
+                    <button class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100">7 Days</button>
+                </div>
+            </div>
+
+            <div class="text-2xl font-bold text-gray-900 mb-6">฿{{ product.price }} / Day</div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex space-x-4">
+            <button class="flex-1 bg-gray-800 text-white py-3 rounded-lg shadow hover:bg-gray-700 transition">
+                Add to Cart
+            </button>
+            <button class="flex-1 bg-pink-500 text-white py-3 rounded-lg shadow hover:bg-pink-600 transition">
+                Rent Now
+            </button>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-white py-4 mt-12">
+    <div class="max-w-7xl mx-auto px-4 text-center text-gray-500">
+        <p>© 2025 Rent Your Style. All rights reserved.</p>
+    </div>
+</footer>
 
 </body>
 </html>

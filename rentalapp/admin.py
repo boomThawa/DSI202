@@ -32,3 +32,8 @@ class ReturnAdmin(admin.ModelAdmin):
 class TrendAdmin(admin.ModelAdmin):
     list_display = ('title', 'created_at')
     search_fields = ('title',)
+
+from django.contrib.auth.decorators import login_required
+@login_required
+def profile(request):
+    return render(request, 'rental/profile.html')

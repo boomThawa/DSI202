@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     # หน้าหลัก
     path('', views.home, name='home'),
+    path('profile/', views.profile, name='profile'),  # Add this line
 
     # ฟีเจอร์ผู้ใช้
     path('wishlist/', views.wishlist, name='wishlist'),
