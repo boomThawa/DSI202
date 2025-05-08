@@ -1,25 +1,149 @@
 {% load static %}
 
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wishlist - Rent Your Style</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f5f5f5; /* Light gray background for a clean design */
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
 
-{% block title %}Wishlist - Rent Your Style{% endblock %}
+        header {
+            background: #333;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+        }
 
-{% block content %}
-<h1 class="text-3xl font-bold text-gray-900 mb-6">Your Wishlist</h1>
-<div>
-    {% for item in wishlist %}
-    <div class="flex justify-between items-center border-b border-gray-200 py-4">
-        <div class="flex items-center space-x-4">
-            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="w-16 h-16 object-cover rounded">
-            <div>
-                <h2 class="text-lg font-semibold">{{ item.product.name }}</h2>
-                <p class="text-gray-600">฿{{ item.product.price }} / Day</p>
+        header a {
+            color: #fff;
+            margin: 0 1rem;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        header a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #ff69b4; /* Elegant pink for the title */
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .wishlist-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .wishlist-item:last-child {
+            border-bottom: none;
+        }
+
+        .wishlist-item img {
+            width: 64px;
+            height: 64px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .wishlist-item-details {
+            flex: 1;
+            margin-left: 1rem;
+        }
+
+        .wishlist-item-details p {
+            margin: 0;
+        }
+
+        .wishlist-item-details .name {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .wishlist-item-details .description {
+            color: #000000;
+            font-size: 0.9rem;
+        }
+
+        .remove-btn {
+            background: #ff69b4; /* Pink button */
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background: #e0568f; /* Slightly darker pink for hover */
+        }
+
+        footer {
+            background: #000000;
+            color: #fff;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <nav>
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'profile' %}">Profile</a>
+        <a href="{% url 'wishlist' %}">Wishlist</a>
+        <a href="{% url 'cart' %}">Cart</a>
+    </nav>
+</header>
+
+<main>
+    <h1>Your Wishlist</h1>
+    <div>
+        {% for item in wishlist %}
+        <div class="wishlist-item">
+            <img src="{{ item.image.url }}" alt="{{ item.name }}">
+            <div class="wishlist-item-details">
+                <p class="name">{{ item.name }}</p>
+                <p class="description">{{ item.description }}</p>
             </div>
+            <form method="POST" action="{% url 'remove_from_wishlist' item.id %}">
+                {% csrf_token %}
+                <button type="submit" class="remove-btn">Remove</button>
+            </form>
         </div>
-        <a href="#" class="text-pink-500 font-semibold">Remove</a>
+        {% endfor %}
     </div>
-    {% empty %}
-    <p class="text-gray-600">Your wishlist is empty.</p>
-    {% endfor %}
-</div>
-{% endblock %}
+</main>
+
+<footer>
+    <p>&copy; 2025 Rent Your Style</p>
+</footer>
+
+</body>
+</html>

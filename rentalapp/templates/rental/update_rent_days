@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Update Rental Days</h1>
+<form method="post">
+    {% csrf_token %}
+    <label for="rent_days">Number of Rental Days:</label>
+    <input type="number" id="rent_days" name="rent_days" value="{{ cart_item.rent_days }}" min="1">
+    <button type="submit" class="btn btn-primary">Update</button>
+</form>
+<p>Total Price: {{ cart_item.product.price }} x {{ cart_item.rent_days }}</p>
+{% endblock %}

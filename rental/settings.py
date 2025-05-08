@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'rentalapp',  # ควรมี rentalapp อยู่ในนี้
+
 ]
 
 
@@ -84,8 +85,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  # ใช้ SMTP ของ Gmail หรือผู้ให้บริการอื่น ๆ
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your-email@gmail.com'
-EMAIL_HOST_PASSWORD = 'your-email-password'
+EMAIL_HOST_USER = 'thawaporn.t@gmail.com'
+EMAIL_HOST_PASSWORD = 'Tt20122004'
 
 
 # Password validation

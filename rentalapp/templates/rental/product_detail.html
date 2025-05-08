@@ -10,18 +10,41 @@
         body {
             font-family: 'Prompt', sans-serif;
         }
+
+        .gradient-header {
+            background: linear-gradient(90deg, #ff7eb3, #ff758c);
+            color: white;
+        }
+
+        .price-tag {
+            background: #ff758c;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .button-hover:hover {
+            transform: scale(1.05);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .disabled-button {
+            background-color: #ccc !important;
+            cursor: not-allowed !important;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
 <!-- Header -->
-<header class="bg-white shadow-md py-4">
+<header class="gradient-header py-4">
     <div class="max-w-7xl mx-auto px-4 flex items-center justify-between">
         <span class="text-2xl font-bold uppercase tracking-wide">Rent Your Style</span>
         <div class="flex space-x-4">
-            <a href="{% url 'wishlist' %}" class="text-gray-800 hover:text-pink-500 font-semibold">Wishlist</a>
-            <a href="{% url 'profile' %}" class="text-gray-800 hover:text-pink-500 font-semibold">Profile</a>
-            <a href="{% url 'cart' %}" class="text-gray-800 hover:text-pink-500 font-semibold">Cart</a>
+            <a href="{% url 'wishlist' %}" class="text-white hover:underline font-semibold">Wishlist</a>
+            <a href="{% url 'profile' %}" class="text-white hover:underline font-semibold">Profile</a>
+            <a href="{% url 'cart' %}" class="text-white hover:underline font-semibold">Cart</a>
         </div>
     </div>
 </header>
@@ -29,70 +52,157 @@
 <!-- Product Section -->
 <main class="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-2 gap-12">
     <!-- Left Column: Product Image -->
-    <div class="flex justify-center items-center">
+    <div class="flex justify-center items-center relative">
         <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full max-w-md object-cover rounded-lg shadow-lg">
+        <div class="absolute top-4 left-4 price-tag">
+            ฿{{ product.price }} / Day
+        </div>
     </div>
 
     <!-- Right Column: Product Details -->
-    <div class="flex flex-col justify-between">
+    <div class="flex flex-col justify-between bg-white p-6 rounded-lg shadow-lg">
         <!-- Product Information -->
         <div>
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ product.name }}</h1>
-            <p class="text-gray-600 text-lg mb-4">{{ product.description }}</p>
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">{{ product.name }}</h1>
+            <p class="text-gray-600 text-lg mb-6">{{ product.description }}</p>
 
-            <div class="mb-4">
-                <span class="text-lg text-gray-500">Available colors: </span>
-                <button class="w-8 h-8 rounded-full bg-black border-2 border-gray-300"></button>
-                <button class="w-8 h-8 rounded-full bg-red-500 border-2 border-gray-300"></button>
-            </div>
-
-            <div class="mb-4">
-                <label for="size" class="block text-gray-500 text-sm mb-1">Select your size:</label>
-                <select id="size" class="p-2 border border-gray-300 rounded-md w-full">
-                    <option>Small</option>
-                    <option>Medium</option>
-                    <option>Large</option>
+            <div class="mb-6">
+                <label for="size" class="block text-gray-800 text-sm font-semibold mb-2">Select Size:</label>
+                <select id="size" name="size" class="p-3 border border-gray-300 rounded-md w-full focus:ring-pink-500 focus:border-pink-500">
+                    {% for size in product.sizes %}
+                    <option value="{{ size }}">{{ size }}</option>
+                    {% endfor %}
                 </select>
             </div>
 
-            <div class="mb-4">
-                <span class="text-lg text-gray-500">Rent duration:</span>
-                <div class="flex space-x-4 mt-2">
-                    <button class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100">3 Days</button>
-                    <button class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100">5 Days</button>
-                    <button class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100">7 Days</button>
-                </div>
+            <div class="mb-6">
+                <label for="start_date" class="block text-gray-800 text-sm font-semibold mb-2">Start Date (วันที่เช่า):</label>
+                <input type="date" id="start_date" name="start_date" required class="p-3 border border-gray-300 rounded-md w-full focus:ring-pink-500 focus:border-pink-500">
             </div>
 
-            <div class="text-2xl font-bold text-gray-900 mb-6">฿{{ product.price }} / Day</div>
+            <div class="mb-6">
+                <label for="rent_days" class="block text-gray-800 text-sm font-semibold mb-2">Rent Duration (Days) (ระยะเวลาการเช่า):</label>
+                <input type="number" id="rent_days" name="rent_days" min="1" value="1" required class="p-3 border border-gray-300 rounded-md w-full focus:ring-pink-500 focus:border-pink-500">
+            </div>
+
+            <div class="mb-6">
+                <label for="return_date" class="block text-gray-800 text-sm font-semibold mb-2">Return Date (วันที่คืน):</label>
+                <input type="text" id="return_date" name="return_date" readonly class="p-3 border border-gray-300 rounded-md w-full bg-gray-100">
+            </div>
+
+            <div id="total_price" class="text-2xl font-semibold text-pink-600 mt-4">Total Price: ฿0</div>
         </div>
 
         <!-- Actions -->
-        <div class="flex space-x-4">
-            <!-- Add to Cart -->
-            <form method="post" action="{% url 'add_to_cart' product.id %}" class="flex-1">
-                {% csrf_token %}
-                <button type="submit" class="w-full bg-gray-800 text-white py-3 rounded-lg shadow hover:bg-gray-700 transition">
-                    Add to Cart
-                </button>
-            </form>
-        
-            <!-- Rent Now -->
-            <form method="post" action="{% url 'rent_now' product.id %}" class="flex-1">
-                {% csrf_token %}
-                <button type="submit" class="w-full bg-pink-500 text-white py-3 rounded-lg shadow hover:bg-pink-600 transition">
-                    Rent Now
-                </button>
-            </form>
-        </div>        
+<div class="flex space-x-4 mt-8">
+    <!-- Add to Cart -->
+    <form method="POST" action="{% url 'add_to_cart' product.id %}" class="flex-1">
+        {% csrf_token %}
+        <input type="hidden" name="size" id="cart_size" value="">
+        <input type="hidden" name="start_date" id="cart_start_date" value="">
+        <input type="hidden" name="rent_days" id="cart_rent_days" value="">
+        <input type="hidden" name="return_date" id="cart_return_date" value="">
+        <div class="flex items-center space-x-2">
+            <input 
+                type="number" 
+                name="quantity" 
+                id="cart_quantity" 
+                value="1" 
+                min="1" 
+                class="w-16 p-2 border border-gray-300 rounded-md text-center"
+                placeholder="Qty" 
+            />
+            <button type="submit" class="flex-1 bg-gray-800 text-white py-3 rounded-lg shadow button-hover">
+                Add to Cart
+            </button>
+        </div>
+    </form>
+
+    <!-- Rent Now -->
+    <form method="POST" action="{% url 'rent_now' product.id %}" class="flex-1">
+        {% csrf_token %}
+        <input type="hidden" name="size" id="rent_size" value="">
+        <input type="hidden" name="start_date" id="rent_start_date" value="">
+        <input type="hidden" name="rent_days" id="rent_rent_days" value="">
+        <input type="hidden" name="return_date" id="rent_return_date" value="">
+        <div class="flex items-center space-x-2">
+            <input 
+                type="number" 
+                name="quantity" 
+                id="rent_quantity" 
+                value="1" 
+                min="1" 
+                class="w-16 p-2 border border-gray-300 rounded-md text-center"
+                placeholder="Qty" 
+            />
+            <button type="submit" class="flex-1 bg-pink-500 text-white py-3 rounded-lg shadow button-hover">
+                Rent Now
+            </button>
+        </div>
+    </form>
+</div>
+    </div>
 </main>
 
 <!-- Footer -->
-<footer class="bg-white py-4 mt-12">
-    <div class="max-w-7xl mx-auto px-4 text-center text-gray-500">
+<footer class="gradient-header py-6 mt-12">
+    <div class="max-w-7xl mx-auto px-4 text-center text-white">
         <p>© 2025 Rent Your Style. All rights reserved.</p>
     </div>
 </footer>
+
+<script>
+    const startDateInput = document.getElementById('start_date');
+    const rentDaysInput = document.getElementById('rent_days');
+    const returnDateInput = document.getElementById('return_date');
+    const totalPriceElement = document.getElementById('total_price');
+
+    const updateReturnDate = () => {
+        const startDate = new Date(startDateInput.value);
+        const rentDays = parseInt(rentDaysInput.value) || 0;
+
+        if (!isNaN(startDate.getTime()) && rentDays > 0) {
+            const returnDate = new Date(startDate);
+            returnDate.setDate(returnDate.getDate() + rentDays);
+            returnDateInput.value = returnDate.toISOString().split('T')[0];
+        } else {
+            returnDateInput.value = '';
+        }
+    };
+
+    const updateTotalPrice = () => {
+        const rentDays = parseInt(rentDaysInput.value) || 0;
+        const pricePerDay = {{ product.price }};
+        const totalPrice = rentDays * pricePerDay;
+        totalPriceElement.textContent = `Total Price: ฿${totalPrice}`;
+    };
+
+    const updateHiddenInputs = () => {
+        document.getElementById('cart_size').value = document.getElementById('size').value;
+        document.getElementById('cart_start_date').value = startDateInput.value;
+        document.getElementById('cart_rent_days').value = rentDaysInput.value;
+        document.getElementById('cart_return_date').value = returnDateInput.value;
+
+        document.getElementById('rent_size').value = document.getElementById('size').value;
+        document.getElementById('rent_start_date').value = startDateInput.value;
+        document.getElementById('rent_rent_days').value = rentDaysInput.value;
+        document.getElementById('rent_return_date').value = returnDateInput.value;
+    };
+
+    startDateInput.addEventListener('input', () => {
+        updateReturnDate();
+        updateHiddenInputs();
+    });
+    rentDaysInput.addEventListener('input', () => {
+        updateReturnDate();
+        updateTotalPrice();
+        updateHiddenInputs();
+    });
+
+    updateReturnDate();
+    updateTotalPrice();
+    updateHiddenInputs();
+</script>
 
 </body>
 </html>

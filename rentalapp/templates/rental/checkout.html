@@ -1,6 +1,27 @@
-<h2 class="text-2xl font-bold mb-4">Checkout</h2>
-{% if product %}
-    <p>คุณกำลังเช่า <strong>{{ product.name }}</strong> ในราคา ฿{{ product.price }} / วัน</p>
-{% else %}
-    <p>ไม่มีสินค้าในรายการเช่า</p>
-{% endif %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+<body class="bg-gray-100 text-gray-800">
+    <div class="max-w-4xl mx-auto px-4 py-12">
+        <h1 class="text-3xl font-bold mb-6 text-center">ยืนยันการเช่า</h1>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-semibold mb-4">{{ checkout.product.name }}</h2>
+            <p class="text-gray-700 mb-2">ราคา/วัน: ฿{{ checkout.product.price }}</p>
+            <p class="text-gray-700 mb-2">จำนวนวันที่เช่า: {{ checkout.rent_days }} วัน</p>
+            <p class="text-gray-700 font-bold mb-4">ราคารวม: ฿{{ checkout.total_price }}</p>
+
+            <form method="POST" action="{% url 'checkout' checkout.id %}">
+                {% csrf_token %}
+                <button type="submit" class="w-full bg-pink-500 text-white py-3 rounded-lg shadow hover:bg-pink-600 transition">
+                    ยืนยันการเช่า
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

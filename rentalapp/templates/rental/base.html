@@ -21,28 +21,37 @@
 
 <body class="bg-white text-gray-900">
   <!-- Navbar -->
-  <nav class="bg-white text-gray-900 shadow-md sticky top-0 z-50 border-b border-gray-300">
-    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
-      <div class="flex items-center space-x-8">
-        <span class="text-2xl font-bold text-black uppercase tracking-wide">MindVibe</span>
-        <a href="{% url 'home' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Studio</a>
-        <a href="{% url 'product_list' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Drop</a>
-        <a href="{% url 'category_list' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Capsules</a>
-        <a href="{% url 'trend_list' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">trends</a>
-        <a href="{% url 'how_to_rent' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">how to rent</a>
-        <a href="{% url 'account' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">my account</a>
-      </div>
-      <div class="flex items-center space-x-4">
-        <form action="{% url 'outfit_search' %}" method="get" class="flex items-center space-x-2">
-          <input type="text" name="q" class="p-2 border border-gray-300 rounded-md bg-gray-100 placeholder-gray-500 text-sm"
-            placeholder="Find your fit..." />
-          <button type="submit" class="text-pink-500 text-lg">🔍</button>
-        </form>
-        <a href="{% url 'cart' %}" class="text-gray-900 hover:text-pink-500 text-xl">🛒</a>
-        <a href="{% url 'wishlist' %}" class="text-gray-900 hover:text-pink-500 text-xl">❤️</a>
-      </div>
+<nav class="bg-white text-gray-900 shadow-md sticky top-0 z-50 border-b border-gray-300">
+  <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+    <!-- Left Navigation Links -->
+    <div class="flex items-center space-x-8">
+      <span class="text-2xl font-bold text-black uppercase tracking-wide">MindVibe</span>
+      <a href="{% url 'home' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Studio</a>
+      <a href="{% url 'product_list' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Drop</a>
+      <a href="{% url 'trend_list' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Trends</a>
+      <a href="{% url 'account' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">My Account</a>
     </div>
-  </nav>
+
+    <!-- Right Navigation and Search -->
+    <div class="flex items-center space-x-4">
+      <!-- Search Form -->
+      <form action="{% url 'product_list' %}" method="get" class="flex items-center space-x-2">
+        <input 
+          type="text" 
+          name="search" 
+          class="p-2 border border-gray-300 rounded-md bg-gray-100 placeholder-gray-500 text-sm" 
+          placeholder="Search products..." 
+          value="{{ request.GET.search }}" 
+        />
+        <button type="submit" class="text-pink-500 text-lg">🔍</button>
+      </form>
+
+      <!-- Cart and Wishlist Icons -->
+      <a href="{% url 'cart' %}" class="text-gray-900 hover:text-pink-500 text-xl">🛒</a>
+      <a href="{% url 'wishlist' %}" class="text-gray-900 hover:text-pink-500 text-xl">❤️</a>
+    </div>
+  </div>
+</nav>
 
   <!-- Hero Banner -->
   <section class="bg-gradient-to-b from-white via-zinc-50 to-white text-gray-900 min-h-screen flex items-center justify-center text-center">

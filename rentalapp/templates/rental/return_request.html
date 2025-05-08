@@ -1,10 +1,14 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Invoice</h1>
+<h1>Return Request</h1>
 <p><strong>Rental ID:</strong> {{ rental.id }}</p>
 <p><strong>Product:</strong> {{ rental.product.name }}</p>
 <p><strong>Rent Days:</strong> {{ rental.rent_days }}</p>
 <p><strong>Total Price:</strong> ${{ rental.total_price }}</p>
-<p><strong>Created At:</strong> {{ rental.created_at }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Submit Return Request</button>
+</form>
 {% endblock %}
