@@ -14,6 +14,31 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 
+# Home Page
+def home(request):
+    try:
+        featured_products = Product.objects.filter(is_featured=True)[:3]
+        products = Product.objects.all()
+        for product in products:
+            print(f"DEBUG: Product ID {product.id}, Sizes: {product.sizes}")
+        gallery_images = [
+            "1.1.png",
+            "Accessories.png",
+            "Beach-Day.png",
+            "Gentlewoman-Waistband.png",
+            "Sister-JINNY-TO.png",
+            "Unigam-BEBBY-TOP.png"
+        ]
+        context = {
+            'welcome_message': 'Welcome to the Fashion Rental Platform!',
+            'featured_products': featured_products,
+            'gallery_images': gallery_images,
+            'products': products,
+        }
+        return render(request, 'rental/base.html', context)
+    except TypeError as e:
+        print(f"ERROR: {e}")  # Log the error for debugging
+        return render(request, 'rental/error.html', {'message': 'Invalid product data encountered.'})
 
 # Invoice
 @login_required
@@ -120,23 +145,7 @@ def outfit_search(request):
     results = Product.objects.filter(name__icontains=query) if query else []
     return render(request, 'rental/outfit_search.html', {'query': query, 'results': results})
 
-# Home Page
-def home(request):
-    featured_products = Product.objects.filter(is_featured=True)[:3]
-    gallery_images = [
-        "1.1.png",
-        "Accessories.png",
-        "Beach-Day.png",
-        "Gentlewoman-Waistband.png",
-        "Sister-JINNY-TO.png",
-        "Unigam-BEBBY-TOP.png"
-    ]
-    context = {
-        'welcome_message': 'Welcome to the Fashion Rental Platform!',
-        'featured_products': featured_products,
-        'gallery_images': gallery_images,
-    }
-    return render(request, 'rental/base.html', context)
+
 
 # How To Rent
 def how_to_rent(request):

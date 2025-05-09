@@ -49,8 +49,8 @@ class Product(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
-    sizes = models.CharField(max_length=255, blank=True, null=True)  # ตัวอย่างฟิลด์
-
+    sizes = models.JSONField(default=list, blank=True, help_text="Available sizes for the product.")
+    
     image = models.ImageField(upload_to='products/', blank=True, null=True)
     category = models.ForeignKey('Category', on_delete=models.CASCADE)
     is_featured = models.BooleanField(default=False)
