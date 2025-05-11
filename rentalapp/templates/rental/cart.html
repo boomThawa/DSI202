@@ -15,7 +15,6 @@
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-  <!-- Navbar -->
   <nav class="bg-white shadow-md sticky top-0 z-50 border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
       <span class="text-2xl font-bold text-black uppercase tracking-wide">MindVibe</span>
@@ -23,16 +22,13 @@
     </div>
   </nav>
 
-  <!-- Page Content -->
   <div class="max-w-7xl mx-auto px-4 py-16">
     <h1 class="text-4xl font-extrabold tracking-tight mb-10 text-center text-gray-900 uppercase">
       Your Cart
     </h1>
 
     {% if cart_items %}
-    <!-- Cart Items Section -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-      <!-- Product List -->
       <div class="lg:col-span-2 space-y-6">
         {% for item in cart_items %}
         <div class="flex items-center bg-white rounded-xl shadow-md p-6 space-x-6 hover:shadow-lg transition relative">
@@ -58,7 +54,6 @@
         {% endfor %}
       </div>
 
-      <!-- Order Summary -->
       <div class="bg-white p-6 rounded-xl shadow-md">
         <h2 class="text-2xl font-bold text-gray-800 mb-4">Order Summary</h2>
         <div class="space-y-4">
@@ -75,16 +70,21 @@
             <span id="total-price" class="text-pink-500">฿{{ total }}</span>
           </div>
         </div>
+        {% if cart_items %}
         <a href="{% url 'checkout' %}" class="mt-6 w-full bg-pink-500 text-white py-3 rounded-lg font-semibold shadow-md hover:bg-pink-600 transition text-center block">
-          Proceed to Checkout
+            Proceed to Checkout
         </a>
+      {% else %}
+        <a href="#" class="mt-6 w-full bg-gray-500 text-white py-3 rounded-lg font-semibold text-center block cursor-not-allowed">
+            Cannot Proceed to Checkout
+        </a>
+      {% endif %}
         <p class="text-sm text-center text-gray-500 mt-4">
           By placing your order, you agree to our <a href="#" class="text-pink-500 hover:underline">Terms of Service</a>.
         </p>
       </div>
     </div>
     {% else %}
-    <!-- Empty Cart -->
     <div class="flex flex-col items-center justify-center py-16 text-center">
       <img src="https://cdn-icons-png.flaticon.com/512/4076/4076549.png" alt="empty cart" class="w-40 h-40 mb-6 opacity-90">
       <h2 class="text-2xl font-semibold text-pink-600 mb-2">Your cart is empty</h2>
@@ -96,7 +96,6 @@
     {% endif %}
   </div>
 
-  <!-- Footer -->
   <footer class="bg-white text-gray-900 py-8 border-t border-gray-300">
     <div class="max-w-7xl mx-auto px-4 text-center">
       <p class="text-sm text-gray-500">© 2025 MindVibe. All rights reserved.</p>

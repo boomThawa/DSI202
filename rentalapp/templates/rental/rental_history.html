@@ -1,61 +1,37 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="max-w-4xl mx-auto px-4 py-10">
-    <h2 class="text-2xl font-bold mb-6">ประวัติการเช่า</h2>
+{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ประวัติการเช่า - MindVibe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="bg-gray-100 text-gray-900 font-[Prompt]">
+    <div class="container mx-auto p-8 mt-10">
+        <h1 class="text-3xl font-bold text-indigo-600 mb-6">ประวัติการเช่า</h1>
 
-    {% if rentals %}
-        <div class="space-y-6">
-            {% for rental in rentals %}
-                <div class="bg-white p-4 shadow rounded">
-                    <p class="text-gray-700">วันที่เช่า: {{ rental.rental_date|date:"d M Y H:i" }}</p>
-                    <ul class="mt-2 text-sm text-gray-600 space-y-1">
-                        {% for item in rental.items.all %}
-                        <li>
-                            {{ item.product.name }} | {{ item.rent_days }} วัน | ฿{{ item.total }}
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    <p class="mt-2 font-semibold">รวม: ฿{{ rental.total_price }}</p>
-                    <a href="{% url 'invoice' rental.id %}" class="text-pink-500 hover:underline text-sm">ดูใบเสร็จ</a>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p class="text-gray-500">คุณยังไม่มีประวัติการเช่า</p>
-    {% endif %}
-</div>
-
-{% if rentals and not rental.returned %}
-    <form action="{% url 'return_request' rental.id %}" method="post" class="mt-2">
-        {% csrf_token %}
-        <button type="submit" class="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600 text-sm">
-            ขอคืนสินค้า
-        </button>
-    </form>
-{% else %}
-    <span class="text-green-600 font-semibold text-sm">คืนแล้ว</span>
-{% endif %}
-
-{% if messages %}
-    <div class="alert">
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
+        {% if rentals %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for rental in rentals %}
+                    {% if rental.is_payment_verified %}
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <h2 class="text-xl font-semibold text-indigo-700 mb-2">รายการเช่า #{{ rental.id }}</h2>
+                            <p class="text-gray-600 mb-1">วันที่เช่า: {{ rental.start_date }}</p>
+                            <p class="text-gray-600 mb-1">ยอดรวม: {{ rental.total_price }} บาท</p>
+                            <p class="text-green-600 font-semibold mb-1">สถานะ: ชำระเงินแล้ว</p>
+                            <p class="text-gray-600 mb-1">วันที่ชำระเงิน: {{ rental.payment_verified_date|date:"d/m/Y H:i" }}</p>
+                            <a href="{% url 'invoice' rental.id %}" class="inline-block mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-sm">ดูใบเสร็จ</a>
+                            <a href="{% url 'return_request' rental.id %}" class="inline-block mt-2 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-sm">แจ้งคืนสินค้า</a>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500 text-center">ไม่มีประวัติการเช่า</p>
+        {% endif %}
     </div>
-{% endif %}
-
-<h2 class="text-xl font-bold mb-4">คำขอคืนสินค้าทั้งหมด</h2>
-{% for rental in pending_returns %}
-    <div class="bg-white p-4 shadow rounded mb-3">
-        <p>ผู้ใช้: {{ rental.user.username }}</p>
-        <p>สินค้า: {{ rental.product.name }}</p>
-        <div class="mt-2 space-x-2">
-            <a href="{% url 'approve_return' rental.id %}" class="bg-green-500 text-white px-4 py-1 rounded">อนุมัติ</a>
-            <a href="{% url 'reject_return' rental.id %}" class="bg-red-500 text-white px-4 py-1 rounded">ปฏิเสธ</a>
-        </div>
-    </div>
-{% empty %}
-    <p>ยังไม่มีคำขอคืนสินค้า</p>
-{% endfor %}
-
-{% endblock %}
+</body>
+</html>

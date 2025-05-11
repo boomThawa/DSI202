@@ -14,31 +14,6 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 
-# Home Page
-def home(request):
-    try:
-        featured_products = Product.objects.filter(is_featured=True)[:3]
-        products = Product.objects.all()
-        for product in products:
-            print(f"DEBUG: Product ID {product.id}, Sizes: {product.sizes}")
-        gallery_images = [
-            "1.1.png",
-            "Accessories.png",
-            "Beach-Day.png",
-            "Gentlewoman-Waistband.png",
-            "Sister-JINNY-TO.png",
-            "Unigam-BEBBY-TOP.png"
-        ]
-        context = {
-            'welcome_message': 'Welcome to the Fashion Rental Platform!',
-            'featured_products': featured_products,
-            'gallery_images': gallery_images,
-            'products': products,
-        }
-        return render(request, 'rental/base.html', context)
-    except TypeError as e:
-        print(f"ERROR: {e}")  # Log the error for debugging
-        return render(request, 'rental/error.html', {'message': 'Invalid product data encountered.'})
 
 # Invoice
 @login_required
@@ -101,24 +76,6 @@ def wishlist(request):
     wishlist_items = []  # Example placeholder for Wishlist data
     return render(request, 'rental/wishlist.html', {'wishlist_items': wishlist_items})
 
-# Checkout
-@login_required
-def checkout(request, checkout_id):
-    checkout = get_object_or_404(Checkout, id=checkout_id, user=request.user)
-
-    if request.method == "POST":
-        # Confirm the rental and update the product availability
-        checkout.is_confirmed = True
-        checkout.save()
-
-        product = checkout.product
-        product.is_available = False
-        product.save()
-
-        messages.success(request, f"คุณเช่าสินค้า {product.name} เป็นเวลา {checkout.rent_days} วันเรียบร้อยแล้ว!")
-        return redirect('rental_history')
-
-    return render(request, 'rental/checkout.html', {'checkout': checkout})
 
 # Return Outfit
 @login_required
@@ -145,93 +102,112 @@ def outfit_search(request):
     results = Product.objects.filter(name__icontains=query) if query else []
     return render(request, 'rental/outfit_search.html', {'query': query, 'results': results})
 
+# Home Page
+from django.shortcuts import render
+from .models import Product
+
+def home(request):
+    # ดึงสินค้าที่ถูกกำหนดให้เป็นสินค้ายอดนิยม (Featured Products)
+    featured_products = Product.objects.filter(is_featured=True)[:3]
+    
+    # ตรวจสอบและเตรียมข้อมูลสินค้าที่จะแสดงใน Template
+    for product in featured_products:
+        # ตรวจสอบว่าฟิลด์ sizes มีค่าหรือไม่
+        if not product.sizes:
+            product.sizes = []  # กำหนดค่าเริ่มต้นเป็น list ว่าง
+        elif isinstance(product.sizes, str):  # กรณี sizes เป็น string (JSON string)
+            try:
+                import json
+                product.sizes = json.loads(product.sizes)  # แปลงเป็น Python list
+            except json.JSONDecodeError:
+                product.sizes = []  # หาก JSON ไม่ถูกต้อง ให้กำหนดเป็น list ว่าง
+
+    # กำหนดภาพสำหรับแกลเลอรี
+    gallery_images = [
+        "1.1.png",
+        "Accessories.png",
+        "Beach-Day.png",
+        "Gentlewoman-Waistband.png",
+        "Sister-JINNY-TO.png",
+        "Unigam-BEBBY-TOP.png"
+    ]
+
+    # ส่งข้อมูลไปยัง Template
+    context = {
+        'welcome_message': 'Welcome to the Fashion Rental Platform!',
+        'featured_products': featured_products,
+        'gallery_images': gallery_images,
+    }
+    return render(request, 'rental/base.html', context)
 
 
 # How To Rent
 def how_to_rent(request):
     return render(request, 'rental/how_to_rent.html')
 
-# Profile (CBV)
-from django.views.generic import TemplateView
-from django.utils.decorators import method_decorator
-
-@method_decorator(login_required, name='dispatch')
-class ProfileView(TemplateView):
-    template_name = 'rental/profile.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['user'] = self.request.user
-        return context
 
 # Product Views
-# Product Views
 from django.shortcuts import render
-from .models import Product
-
-from django.shortcuts import render
+from django.http import JsonResponse
 from .models import Product
 
 def product_list(request):
-    products = Product.objects.all()
+    try:
+        # ดึงข้อมูลสินค้าทั้งหมด
+        products = Product.objects.all()
+        sizes = set()
+        
+        # ตรวจสอบและจัดการข้อมูล JSONField สำหรับ sizes
+        for product in products:
+            if product.sizes and isinstance(product.sizes, list):
+                sizes.update(product.sizes)
 
-    # Get unique colors and sizes from the database
-    colors = set()
-    sizes = set()
-    for product in products:
-        if product.colors:
-            colors.update(product.colors)
-        if product.sizes:
-            sizes.update(product.sizes)
+        # Apply filters
+        category = request.GET.get('category')
+        if category:
+            products = products.filter(category_id=category)
 
-    # Apply filters
-    category = request.GET.get('category')
-    if category:
-        products = products.filter(category_id=category)
+        status = request.GET.get('status')
+        if status:
+            products = products.filter(status=status)
 
-    status = request.GET.get('status')
-    if status:
-        products = products.filter(status=status)
+        size = request.GET.get('size')
+        if size:
+            products = products.filter(sizes__contains=[size])
 
-    color = request.GET.get('color')
-    if color:
-        products = products.filter(colors__contains=[color])
+        search_query = request.GET.get('search')
+        if search_query:
+            products = products.filter(name__icontains=search_query)
 
-    size = request.GET.get('size')
-    if size:
-        products = products.filter(sizes__contains=[size])
+        # Apply sorting
+        sort_by = request.GET.get('sort')
+        if sort_by == 'price_asc':
+            products = products.order_by('price')
+        elif sort_by == 'price_desc':
+            products = products.order_by('-price')
+        elif sort_by == 'name_asc':
+            products = products.order_by('name')
+        elif sort_by == 'name_desc':
+            products = products.order_by('-name')
+        elif sort_by == 'rating_asc':
+            products = products.order_by('rating')
+        elif sort_by == 'rating_desc':
+            products = products.order_by('-rating')
 
-    search_query = request.GET.get('search')
-    if search_query:
-        products = products.filter(name__icontains=search_query)
+        # Filter for featured products
+        featured_products = Product.objects.filter(is_featured=True, is_active=True)
 
-    # Apply sorting
-    sort_by = request.GET.get('sort')
-    if sort_by == 'price_asc':
-        products = products.order_by('price')
-    elif sort_by == 'price_desc':
-        products = products.order_by('-price')
-    elif sort_by == 'name_asc':
-        products = products.order_by('name')
-    elif sort_by == 'name_desc':
-        products = products.order_by('-name')
-    elif sort_by == 'rating_asc':
-        products = products.order_by('rating')
-    elif sort_by == 'rating_desc':
-        products = products.order_by('-rating')
+        # Render the template with context data
+        return render(request, 'rental/product_list.html', {
+            'products': products,
+            'sizes': sizes,
+            'featured_products': featured_products,
+        })
 
-    return render(request, 'rental/product_list.html', {
-        'products': products,
-        'colors': colors,
-        'sizes': sizes,
-    })
-    # Filter for featured products for a separate section
-    featured_products = Product.objects.filter(is_featured=True, is_active=True)
-
-    return render(request, 'rental/product_list.html', {
-        'products': products,
-        'featured_products': featured_products,
-    })
+    except TypeError as e:
+        # จัดการข้อผิดพลาด TypeError
+        print(f"Error: {e}")
+        return JsonResponse({"error": "Invalid product data encountered."}, status=500)
 
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
@@ -326,6 +302,8 @@ def add_to_cart(request, product_id):
 def cart(request):
     session_cart = request.session.get('cart', {})
     cart_items = []
+
+    # ดึงข้อมูลสินค้าในตะกร้า
     for product_id, item in session_cart.items():
         try:
             product = Product.objects.get(id=product_id)
@@ -339,10 +317,29 @@ def cart(request):
             })
         except Product.DoesNotExist:
             continue
-    return render(request, 'rental/cart.html', {'cart_items': cart_items})
 
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
+    # คำนวณยอดรวมทั้งหมด
+    subtotal = sum(item['total_price'] for item in cart_items)
+    total = subtotal  # เพิ่มค่าขนส่งหรือส่วนลดได้ในอนาคต
+
+    # เก็บข้อมูลใน Session เพื่อใช้ใน Checkout
+    request.session['checkout_data'] = {
+        'cart_items': cart_items,
+        'subtotal': subtotal,
+        'total': total,
+    }
+
+    # ตรวจสอบว่า checkout_data มีข้อมูลหรือไม่
+    checkout_data = request.session.get('checkout_data', {})
+    if not checkout_data:
+        messages.error(request, "ไม่มีข้อมูลการชำระเงิน")
+        return redirect('cart')  # เปลี่ยนไปหน้าตะกร้า
+
+    return render(request, 'rental/cart.html', {
+        'cart_items': cart_items,
+        'subtotal': subtotal,
+        'total': total,
+    })
 
 @login_required
 def remove_cart_item(request, item_id):
@@ -355,16 +352,92 @@ def remove_cart_item(request, item_id):
         return JsonResponse({'success': False, 'error': 'Item not found in cart'})
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
-# Checkout
-@login_required
+def checkout(request):
+    # 1. ตรวจสอบการเข้าสู่ระบบของผู้ใช้
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    order_id = request.session.get('order_id')
+    order = None
+
+    if not order_id:
+        # สร้าง Order ใหม่และบันทึกเพื่อรับ id
+        order = Order.objects.create(
+            user=request.user,
+            total_price=0.00,  # อ้างอิงจากข้อมูล SQL
+            created_at=timezone.now(),
+            status='pending' # อ้างอิงจากข้อมูล SQL
+            # เพิ่มฟิลด์อื่นๆ ที่จำเป็น
+        )
+        request.session['order_id'] = order.id
+    else:
+        try:
+            order = Order.objects.get(id=order_id, user=request.user)
+        except Order.DoesNotExist:
+            messages.error(request, "ไม่พบรายการสั่งซื้อของคุณ")
+            return redirect('cart')
+
+    checkout_data = request.session.get('checkout_data', {})
+    if not checkout_data:
+        messages.error(request, "ไม่มีข้อมูลการชำระเงิน")
+        return redirect('cart')
+
+    cart_items = checkout_data.get('cart_items', [])
+    subtotal = checkout_data.get('subtotal', 0)
+    total = checkout_data.get('total', 0)
+
+    # อัปเดต total_price ของ order (ถ้าจำเป็น)
+    order.total_price = total
+    order.save()
+
+    return render(request, 'rental/checkout.html', {
+        'cart_items': cart_items,
+        'subtotal': subtotal,
+        'total': total,
+        'order': order,
+    })
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Order
+
 def checkout_view(request):
-    cart = Cart.objects.get(user=request.user)
-    return render(request, 'rental/checkout.html', {'cart': cart})
+    # เช็คว่าผู้ใช้ล็อกอินหรือยัง
+    if not request.user.is_authenticated:
+        return redirect('login')  # ถ้ายังไม่ล็อกอิน ให้ไปหน้า login
+
+    # เช็คว่ามีสินค้าในตะกร้าหรือไม่
+    if not cart_has_items(request):
+        return redirect('cart')  # ถ้าไม่มีสินค้าในตะกร้า ให้ไปที่หน้าตะกร้า
+
+    # ดึง order_id จาก session
+    order_id = request.session.get('order_id')
+    
+    if order_id:
+        # ถ้าพบ order_id ให้ดึง order จากฐานข้อมูล
+        order = get_object_or_404(Order, id=order_id)
+        
+        # คุณสามารถคำนวณ total ได้ตาม logic ของคุณเอง
+        # ตัวอย่างนี้ใช้ฟิลด์ total_price จากโมเดล (ต้องแน่ใจว่ามีใน Order model)
+        total = order.total_price if hasattr(order, 'total_price') else 0
+        
+        return render(request, 'checkout.html', {
+            'order': order,
+            'total': total,
+        })
+    else:
+        # ถ้าไม่พบ order_id ใน session ให้ redirect ไปยังหน้าหลักหรือหน้าที่เหมาะสม
+        return redirect('home')  # เปลี่ยนเป็นชื่อ path ที่เหมาะสม
+
+# ฟังก์ชันตรวจสอบว่าตะกร้ามีสินค้าหรือไม่
+def cart_has_items(request):
+    # สมมติว่า cart ของคุณเก็บใน session, ตรวจสอบให้มี items ใน cart
+    cart = request.session.get('cart', {})
+    return len(cart) > 0
+
 
 # Rent Now
 from django.contrib import messages
-from .models import Product, Checkout
-
 @login_required
 def rent_now(request, product_id):
     product = get_object_or_404(Product, id=product_id)
@@ -406,12 +479,6 @@ def update_rent_days(request, item_id):
         return redirect('cart')
     return render(request, 'rental/update_rent_days.html', {'cart_item': cart_item})
 
-# Rental History
-@login_required
-def rental_history(request):
-    rentals = Rental.objects.filter(user=request.user).order_by('-rental_date')
-    return render(request, 'rental/rental_history.html', {'rentals': rentals})
-
 # Return Management
 @staff_member_required
 def manage_returns(request):
@@ -439,3 +506,143 @@ def reject_return(request, rental_id):
 def trend_list(request):
     trends = Trend.objects.all()
     return render(request, 'rental/trend_list.html', {'trends': trends})
+
+
+
+def thank_you(request):
+    return render(request, 'thank_you.html')
+
+
+
+
+
+from .models import Cart, CartItem, Checkout, Product
+
+def process_checkout(request):
+    cart = get_object_or_404(Cart, user=request.u_ser)
+    cart_items = CartItem.objects.filter(cart=cart)
+
+    for item in cart_items:
+        product = item.product
+        discount_price = product.price - (product.price * (product.discount / 100))
+        total_price = discount_price * item.quantity * item.rent_days
+
+        Checkout.objects.create(
+            user=request.user,
+            product=product,
+            rent_days=item.rent_days,
+            total_price=total_price,
+            created_at=timezone.now(),
+            is_confirmed=False,
+            status='pending'
+        )
+
+    cart_items.delete()
+    cart.delete()
+
+    return redirect('checkout_success')  # หรือหน้า payment
+
+from django.shortcuts import render, get_object_or_404
+from .models import Order
+
+def process_payment(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    checkout_data = request.session.get('checkout_data', {})
+    total = checkout_data.get('total', 0)  # ดึงยอดรวมจาก session
+
+    return render(request, 'rental/payment.html', {'order': order, 'total': total})
+
+
+from .models import Order
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import Product, Rental, Cart, CartItem
+from django.utils import timezone
+
+@login_required
+def payment_success_handler(request): # สมมติว่านี่คือ View ที่จัดการเมื่อชำระเงินสำเร็จ
+    checkout_data = request.session.get('checkout_data')
+
+    if checkout_data and checkout_data.get('cart_items'):
+        rental = Rental.objects.create(
+            user=request.user,
+            start_date=timezone.now().date(), # หรือวันที่เริ่มต้นเช่าจริง
+            total_price=checkout_data.get('total', 0), # ดึงราคารวมจาก Session
+            # ดึงข้อมูลอื่นๆ จาก cart_items หรือ checkout_data
+        )
+
+        for item in checkout_data['cart_items']:
+            product = Product.objects.get(id=item['id'])
+            rental.product = product
+            rental.size = item.get('size', '') # ดึงขนาด (ถ้ามี)
+            rental.color = item.get('color', '') # ดึงสี (ถ้ามี)
+            rental.rent_days = item.get('quantity', 1) # ดึงจำนวนวันเช่า (ใช้ quantity เป็นจำนวนวันเช่า)
+            rental.save() # บันทึกแต่ละสินค้าเป็นการเช่า
+
+        # ล้างตะกร้าสินค้าหลังจากบันทึกประวัติการเช่า
+        request.session['cart'] = {}
+        del request.session['checkout_data']
+
+        messages.success(request, "การชำระเงินเสร็จสมบูรณ์! ระบบได้บันทึกประวัติการเช่าของคุณแล้ว")
+        return redirect('rental_history') # Redirect ไปยังหน้าประวัติการเช่า
+
+    else:
+        messages.error(request, "ไม่พบข้อมูลการเช่า")
+        return redirect('cart') # หรือหน้าที่เหมาะสม
+    
+# Assuming CartItem is linked to the Rental through a Foreign Key
+@login_required
+def check_payment(request):
+    if request.method == "POST":
+        order_id = request.POST.get('order_id')
+        if order_id:
+            try:
+                order = get_object_or_404(Order, id=order_id, user=request.user)
+                cart = Cart.objects.get(user=request.user)
+                cart_items = cart.cartitem_set.all()
+
+                # Create Rental object with a pending payment status
+                rental = Rental.objects.create(
+                    user=request.user,
+                    order=order,  # Associate the rental with the order
+                    start_date=timezone.now().date(),
+                    total_price=order.total_price,
+                    is_payment_verified=False,
+                )
+
+                # Link cart items to the rental
+                for item in cart_items:
+                    RentalItem.objects.create(  # Assuming RentalItem holds the same fields as CartItem
+                        rental=rental,
+                        product=item.product,
+                        quantity=item.quantity,
+                        rent_days=item.rent_days,
+                        start_date=item.start_date,
+                    )
+
+                # Optionally clear the cart
+                cart_items.delete()
+                request.session.pop('order_id', None)
+
+                messages.info(request, "Your payment is pending verification.")
+                return redirect('rental_history')  # Redirect to rental history or payment pending page
+
+            except Order.DoesNotExist:
+                messages.error(request, "Order not found.")
+                return redirect('cart')
+            except Exception as e:
+                messages.error(request, f"An error occurred: {e}")
+                return redirect('cart')
+        else:
+            messages.error(request, "Order ID not provided.")
+            return redirect('cart')
+    else:
+        return redirect('cart')
+
+# rentalapp/views.py
+from django.shortcuts import render
+
+def rental_history(request):
+    # Your logic for handling rental history
+    return render(request, 'rentalapp/rental_history.html')

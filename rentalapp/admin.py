@@ -62,6 +62,21 @@ class UserProfileInline(admin.StackedInline):
 class CustomUserAdmin(BaseUserAdmin):
     inlines = [UserProfileInline]
 
+from django.contrib import admin
+from .models import Product, Category, Rental
+
+class RentalAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'product', 'start_date', 'total_price', 'is_payment_verified', 'payment_verified_date')
+    list_editable = ('is_payment_verified',) # ให้ Admin แก้ไข is_payment_verified ได้โดยตรง
+    readonly_fields = ('payment_verified_date',) # แสดงวันที่ยืนยัน แต่แก้ไขไม่ได้
+
+    def save_model(self, request, obj, form, change):
+        if change and obj.is_payment_verified and not obj.payment_verified_date:
+            obj.payment_verified_date = timezone.now()
+        super().save_model(request, obj, form, change)
+
+admin.site.register(Rental, RentalAdmin)
+
 # Unregister and Re-register User with CustomUserAdmin
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)

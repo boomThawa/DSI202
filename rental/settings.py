@@ -31,7 +31,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'rentalapp',  # ควรมี rentalapp อยู่ในนี้
-
+    
 ]
 
 

@@ -1,0 +1,20 @@
+#qrcode canvas {
+    /* ปรับขนาดหรือสไตล์ของ Canvas ที่แสดง QR Code */
+    width: 250px !important;
+    height: 250px !important;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+  
+  .container {
+    /* ปรับแต่ง Container เพิ่มเติม */
+    padding: 2rem;
+  }
+  
+  h1 {
+    /* ปรับแต่ง Heading เพิ่มเติม */
+    font-size: 2.5rem;
+    color: #e91e63; /* สีชมพู */
+  }
+  
+  /* และอื่นๆ ตามที่คุณต้องการ */

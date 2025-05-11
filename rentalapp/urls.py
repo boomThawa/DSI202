@@ -1,3 +1,4 @@
+#/Users/thawaphorn/Desktop/dsi202-final/rental/rentalapp/urls.py
 from django.urls import path
 from . import views
 from .views import ProfileView, cart
@@ -19,11 +20,17 @@ urlpatterns = [
     path('rent_now/<int:product_id>/', views.rent_now, name='rent_now'),
     path('remove-cart-item/<int:item_id>/', views.remove_cart_item, name='remove_cart_item'),
     path('update_rent_days/<int:item_id>/', views.update_rent_days, name='update_rent_days'),
-    path('checkout/<int:checkout_id>/', views.checkout, name='checkout'),
+    path('checkout/', views.checkout, name='checkout'),
     path('invoice/<int:rental_id>/', views.invoice, name='invoice'),
+    path('process-payment/<int:order_id>/', views.process_payment, name='process_payment'),
+
+
+    path('check_payment/', views.check_payment, name='check_payment'),
+
+    path('thank-you/', views.thank_you, name='thank_you'),  # เพิ่ม URL สำหรับ thank_you
 
     # สินค้า
-    path('rental/history/', views.rental_history, name='rental_history'),
+    path('rental/history/', views.rental_history, name='rental_history'),  # <-- เพิ่มบรรทัดนี้
     path('rental/<int:rental_id>/return/', views.return_request, name='return_request'),
 
     # สินค้า

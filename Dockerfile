@@ -12,6 +12,9 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     libpq-dev gcc wget curl && \
     apt-get clean
+    
+# ติดตั้ง git ก่อน
+RUN apt-get update && apt-get install -y git
 
 # Install Python dependencies
 COPY requirements.txt /app/

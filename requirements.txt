@@ -4,3 +4,5 @@ Pillow
 psycopg2-binary
 django-extensions
 psycopg2
+qrcode[pil]
+promptpay

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Order ID Generator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+    }
+    .order-box {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <p class="order-box">Order ID: <span id="orderID">Loading...</span></p>
+
+  <script>
+    function generateOrderID() {
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let result = '#';
+      for (let i = 0; i < 6; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        result += characters[randomIndex];
+      }
+      return result;
+    }
+
+    // ใช้ค่าเดิมจาก localStorage ถ้ามี
+    let orderID = localStorage.getItem('orderID');
+    if (!orderID) {
+      orderID = generateOrderID();
+      localStorage.setItem('orderID', orderID);
+    }
+
+    document.getElementById('orderID').textContent = orderID;
+  </script>
+
+</body>
+</html>
