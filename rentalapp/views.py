@@ -334,16 +334,17 @@ def add_to_cart(request, product_id):
     # รีไดเร็กไปที่หน้าตะกร้าสินค้า
     return redirect('cart')
 
-@login_required
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import CartItem
+
 def remove_cart_item(request, item_id):
     if request.method == 'POST':
-        cart = request.session.get('cart', {})
-        if str(item_id) in cart:
-            del cart[str(item_id)]
-            request.session['cart'] = cart
-            return JsonResponse({'success': True})
-        return JsonResponse({'success': False, 'error': 'Item not found in cart'})
-    return JsonResponse({'success': False, 'error': 'Invalid request'})
+        cart_item = get_object_or_404(CartItem, pk=item_id)
+        cart_item.delete()
+        return JsonResponse({'success': True})
+    return JsonResponse({'error': 'ลบสินค้าไม่สำเร็จ'}, status=400)
+
 
 def checkout(request):
     # 1. ตรวจสอบการเข้าสู่ระบบของผู้ใช้
