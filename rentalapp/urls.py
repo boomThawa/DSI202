@@ -22,14 +22,15 @@ urlpatterns = [
     path('checkout/', views.checkout, name='checkout'),  # เปลี่ยนตรงนี้
     path('invoice/<int:rental_id>/', views.invoice, name='invoice'),
     path('process-payment/<int:order_id>/', views.process_payment, name='process_payment'),
+    path('payment-success/<int:order_id>/', views.payment_success, name='payment_success'),
+    path('order/<int:order_id>/', views.order_detail, name='order_detail'),
 
 
-    path('check_payment/', views.check_payment, name='check_payment'),
 
     path('thank-you/', views.thank_you, name='thank_you'),  # เพิ่ม URL สำหรับ thank_you
+    path('history/', views.rental_history, name='rental_history'),
 
     # สินค้า
-    path('rental/history/', views.rental_history, name='rental_history'),  # <-- เพิ่มบรรทัดนี้
     path('rental/<int:rental_id>/return/', views.return_request, name='return_request'),
 
     # สินค้า

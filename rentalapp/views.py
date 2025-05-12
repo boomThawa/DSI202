@@ -310,6 +310,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import Product, Cart, CartItem
 from django.utils import timezone
+@login_required
 
 def add_to_cart(request, product_id):
     # ดึงสินค้า
@@ -345,14 +346,13 @@ def remove_cart_item(request, item_id):
         return JsonResponse({'success': True})
     return JsonResponse({'error': 'ลบสินค้าไม่สำเร็จ'}, status=400)
 
+from .models import Product  # สมมุติว่าคุณมี model นี้
+
 def checkout(request):
-    # ตรวจสอบการเข้าสู่ระบบของผู้ใช้
     if not request.user.is_authenticated:
         return redirect('login')
 
     order_id = request.session.get('order_id')
-    order = None
-
     if not order_id:
         order = Order.objects.create(
             user=request.user,
@@ -368,7 +368,6 @@ def checkout(request):
             messages.error(request, "ไม่พบรายการสั่งซื้อของคุณ")
             return redirect('cart')
 
-    # คำนวณจาก cart ใน session
     cart = request.session.get('cart', {})
     if not cart:
         messages.error(request, "ไม่มีสินค้าในตะกร้า")
@@ -383,11 +382,19 @@ def checkout(request):
         total_item_price = quantity * price
         subtotal += total_item_price
 
+        # ดึงชื่อสินค้าจาก model
+        try:
+            product = Product.objects.get(id=item_id)
+            name = product.name
+        except Product.DoesNotExist:
+            name = "Unknown Product"
+
         cart_items.append({
             'id': item_id,
+            'name': name,
             'price': price,
             'quantity': quantity,
-            'total': total_item_price
+            'total_price': total_item_price
         })
 
     total = subtotal
@@ -400,6 +407,7 @@ def checkout(request):
         'total': total,
         'order': order,
     })
+
 
 
 from django.shortcuts import render, redirect, get_object_or_404
@@ -500,9 +508,6 @@ def thank_you(request):
     return render(request, 'thank_you.html')
 
 
-
-
-
 from .models import Cart, CartItem, Checkout, Product
 
 def process_checkout(request):
@@ -529,15 +534,53 @@ def process_checkout(request):
 
     return redirect('checkout_success')  # หรือหน้า payment
 
-from django.shortcuts import render, get_object_or_404
-from .models import Order
+# views.py
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Order, ShippingAddress
 
+@login_required
 def process_payment(request, order_id):
-    order = get_object_or_404(Order, id=order_id)
-    checkout_data = request.session.get('checkout_data', {})
-    total = checkout_data.get('total', 0)  # ดึงยอดรวมจาก session
+    if request.method == 'POST':
+        order = get_object_or_404(Order, id=order_id, user=request.user)
+        checkout_data = request.session.get('checkout_data', {})
+        total = checkout_data.get('total', 0)  # ดึงยอดรวมจาก session
 
-    return render(request, 'rental/payment.html', {'order': order, 'total': total})
+        # 1. รับค่าจากฟอร์มที่อยู่จัดส่ง
+        name = request.POST.get('name')
+        phone = request.POST.get('phone')
+        address_line1 = request.POST.get('address_line1')
+        address_line2 = request.POST.get('address_line2', '')
+        sub_district = request.POST.get('sub_district')
+        district = request.POST.get('district')
+        province = request.POST.get('province')
+        postal_code = request.POST.get('postal_code')
+
+        # 2. สร้าง ShippingAddress ใหม่
+        shipping_address = ShippingAddress.objects.create(
+            user=request.user,
+            name=name,
+            phone=phone,
+            address_line1=address_line1,
+            address_line2=address_line2,
+            sub_district=sub_district,
+            district=district,
+            province=province,
+            postal_code=postal_code,
+            is_default=True  # หรือจะใช้ logic เช็คว่ามีที่อยู่เริ่มต้นหรือยัง
+        )
+
+        # 3. ผูกที่อยู่กับออเดอร์ (ถ้าคุณมีฟิลด์ shipping_address ใน Order)
+        order.shipping_address = shipping_address
+        order.save()
+
+        # 4. TODO: ดำเนินการจ่ายเงินที่นี่ (Stripe, PromptPay หรือระบบอื่น)
+        # ...
+
+        # 5. เปลี่ยนสถานะ หรือ redirect ไปหน้าสำเร็จ
+        return render(request, 'rental/payment.html', {'order': order, 'total': total})  # หรือ redirect ไปยังหน้าชำระเงิน
+
+    return redirect('checkout')  # ถ้าไม่ใช่ POST ก็กลับไป checkout
 
 
 from .models import Order
@@ -548,95 +591,27 @@ from .models import Product, Rental, Cart, CartItem
 from django.utils import timezone
 
 @login_required
-def payment_success_handler(request): # สมมติว่านี่คือ View ที่จัดการเมื่อชำระเงินสำเร็จ
-    checkout_data = request.session.get('checkout_data')
+def payment_success(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
 
-    if checkout_data and checkout_data.get('cart_items'):
-        rental = Rental.objects.create(
-            user=request.user,
-            start_date=timezone.now().date(), # หรือวันที่เริ่มต้นเช่าจริง
-            total_price=checkout_data.get('total', 0), # ดึงราคารวมจาก Session
-            # ดึงข้อมูลอื่นๆ จาก cart_items หรือ checkout_data
-        )
+    # เปลี่ยนสถานะออเดอร์ หรือทำ logic ต่อที่นี่
+    order.status = 'paid'  # สมมุติว่ามีฟิลด์นี้
+    order.save()
 
-        for item in checkout_data['cart_items']:
-            product = Product.objects.get(id=item['id'])
-            rental.product = product
-            rental.size = item.get('size', '') # ดึงขนาด (ถ้ามี)
-            rental.color = item.get('color', '') # ดึงสี (ถ้ามี)
-            rental.rent_days = item.get('quantity', 1) # ดึงจำนวนวันเช่า (ใช้ quantity เป็นจำนวนวันเช่า)
-            rental.save() # บันทึกแต่ละสินค้าเป็นการเช่า
+    return render(request, 'rental/payment_success.html', {'order': order})
 
-        # ล้างตะกร้าสินค้าหลังจากบันทึกประวัติการเช่า
-        request.session['cart'] = {}
-        del request.session['checkout_data']
+from django.contrib.auth.decorators import login_required
+from .models import Order
 
-        messages.success(request, "การชำระเงินเสร็จสมบูรณ์! ระบบได้บันทึกประวัติการเช่าของคุณแล้ว")
-        return redirect('rental_history') # Redirect ไปยังหน้าประวัติการเช่า
-
-    else:
-        messages.error(request, "ไม่พบข้อมูลการเช่า")
-        return redirect('cart') # หรือหน้าที่เหมาะสม
-    
-# Assuming CartItem is linked to the Rental through a Foreign Key
 @login_required
-def check_payment(request):
-    if request.method == "POST":
-        order_id = request.POST.get('order_id')
-        if order_id:
-            try:
-                order = get_object_or_404(Order, id=order_id, user=request.user)
-                cart = Cart.objects.get(user=request.user)
-                cart_items = cart.cartitem_set.all()
-
-                # Create Rental object with a pending payment status
-                rental = Rental.objects.create(
-                    user=request.user,
-                    order=order,  # Associate the rental with the order
-                    start_date=timezone.now().date(),
-                    total_price=order.total_price,
-                    is_payment_verified=False,
-                )
-
-                # Link cart items to the rental
-                for item in cart_items:
-                    RentalItem.objects.create(  # Assuming RentalItem holds the same fields as CartItem
-                        rental=rental,
-                        product=item.product,
-                        quantity=item.quantity,
-                        rent_days=item.rent_days,
-                        start_date=item.start_date,
-                    )
-
-                # Optionally clear the cart
-                cart_items.delete()
-                request.session.pop('order_id', None)
-
-                messages.info(request, "Your payment is pending verification.")
-                return redirect('rental_history')  # Redirect to rental history or payment pending page
-
-            except Order.DoesNotExist:
-                messages.error(request, "Order not found.")
-                return redirect('cart')
-            except Exception as e:
-                messages.error(request, f"An error occurred: {e}")
-                return redirect('cart')
-        else:
-            messages.error(request, "Order ID not provided.")
-            return redirect('cart')
-    else:
-        return redirect('cart')
-
-# rentalapp/views.py
-from django.shortcuts import render
-
-from .models import Rental  # สมมติว่ามี Model ชื่อ Rental
-from django.shortcuts import render
-from .models import Rental
-
 def rental_history(request):
-    if request.user.is_authenticated:
-        history_data = Rental.objects.filter(user=request.user).order_by('-created_at')
-        return render(request, 'rental/rental_history.html', {'history_items': history_data})
-    else:
-        return render(request, 'rental/login_required.html')
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'rental/history.html', {'orders': orders})
+
+from django.contrib.auth.decorators import login_required
+from .models import Order
+
+@login_required
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return render(request, 'rental/order_detail.html', {'order': order})

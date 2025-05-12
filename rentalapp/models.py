@@ -235,6 +235,13 @@ class ShippingAddress(models.Model):
         return f"{self.name} - {self.address_line1}, {self.district}, {self.province}"
 
 class Order(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'รอการชำระเงิน'),
+        ('paid', 'ชำระเงินแล้ว'),
+        ('shipped', 'กำลังจัดส่ง'),
+        ('completed', 'เสร็จสิ้น'),
+        ('cancelled', 'ยกเลิก'),
+    ]
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True, blank=True)

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>รายละเอียดออเดอร์ #{{ order.id }} - MindVibe</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Prompt', sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+  <header class="bg-pink-500 text-white py-6 shadow-md">
+    <div class="max-w-7xl mx-auto px-4">
+      <h1 class="text-2xl font-bold text-center">รายละเอียดคำสั่งซื้อ</h1>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto bg-white mt-8 p-8 rounded-lg shadow">
+    <h2 class="text-xl font-bold text-pink-600 mb-2">Order #{{ order.id }}</h2>
+    <p class="text-gray-700 mb-2">วันที่สั่งซื้อ: {{ order.created_at|date:"d M Y H:i" }}</p>
+    <p class="text-gray-700 mb-2">สถานะ: 
+      <span class="font-semibold text-green-600">{{ order.get_status_display }}</span>
+    </p>
+    <p class="text-gray-700 mb-4">ยอดรวม: <span class="text-lg font-bold text-pink-500">฿{{ order.total_price }}</span></p>
+
+    <div class="mb-6">
+      <h3 class="text-lg font-semibold mb-2">ที่อยู่จัดส่ง</h3>
+      <p>{{ order.shipping_address.name }}</p>
+      <p>{{ order.shipping_address.phone }}</p>
+      <p>{{ order.shipping_address.address_line1 }} {{ order.shipping_address.address_line2 }}</p>
+      <p>{{ order.shipping_address.sub_district }}, {{ order.shipping_address.district }}, {{ order.shipping_address.province }} {{ order.shipping_address.postal_code }}</p>
+    </div>
+
+    <!-- ถ้ามีสินค้าหรือรายการเช่าในอนาคต สามารถใส่ตารางสินค้าได้ที่นี่ -->
+
+    <div class="text-right mt-8">
+      <a href="{% url 'rental_history' %}" class="text-pink-500 hover:underline text-sm">← กลับไปหน้าประวัติการเช่า</a>
+    </div>
+  </main>
+
+  <footer class="text-center text-sm text-gray-500 py-6 mt-12">
+    &copy; 2025 MindVibe. All rights reserved.
+  </footer>
+
+</body>
+</html>

@@ -20,43 +20,62 @@
       <p class="mt-2 text-lg font-medium">Your one-stop destination for fashion rentals</p>
     </div>
   </header>
-
   <main class="max-w-7xl mx-auto px-4 py-16">
     <h1 class="text-4xl font-extrabold tracking-tight mb-10 text-center text-gray-900 uppercase">
       Checkout
     </h1>
-
-    <div class="bg-white p-8 rounded-xl shadow-md">
-      <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-3">Your Order</h2>
-      <div class="space-y-4">
-        {% for item in cart_items %}
-        <div class="flex items-center justify-between py-4 border-b">
-          <div>
-            <h3 class="text-lg font-semibold">{{ item.name }}</h3>
-            <p class="text-sm text-gray-500">Quantity: {{ item.quantity }}</p>
+  
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+      <!-- ซ้าย: รายการสินค้า -->
+      <div class="bg-white p-8 rounded-xl shadow-md">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-3">Your Order</h2>
+        <div class="space-y-4">
+          {% for item in cart_items %}
+          <div class="flex items-center justify-between py-4 border-b">
+            <div>
+              <h3 class="text-lg font-semibold">{{ item.name }}</h3>
+              <p class="text-sm text-gray-500">Quantity: {{ item.quantity }}</p>
+            </div>
+            <span class="text-pink-500 font-bold text-xl">฿{{ item.total_price }}</span>
           </div>
-          <span class="text-pink-500 font-bold text-xl">฿{{ item.total_price }}</span>
+          {% endfor %}
         </div>
-        {% endfor %}
+        <div class="mt-6 border-t pt-4">
+          <div class="flex justify-between text-lg text-gray-800 font-semibold">
+            <span>Subtotal</span>
+            <span>฿{{ subtotal }}</span>
+          </div>
+          <div class="flex justify-between text-lg text-gray-800 font-semibold">
+            <span>Total</span>
+            <span class="text-pink-500">฿{{ total }}</span>
+          </div>
+        </div>
       </div>
-      <div class="mt-6 border-t pt-4">
-        <div class="flex justify-between text-lg text-gray-800 font-semibold">
-          <span>Subtotal</span>
-          <span>฿{{ subtotal }}</span>
-        </div>
-        <div class="flex justify-between text-lg text-gray-800 font-semibold">
-          <span>Total</span>
-          <span class="text-pink-500">฿{{ total }}</span>
-        </div>
+  
+      <!-- ขวา: ฟอร์มกรอกที่อยู่ -->
+      <div class="bg-white p-8 rounded-xl shadow-md">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-3">Shipping Address</h2>
+        <form action="{% url 'process_payment' order.id %}" method="POST" class="space-y-4">
+          {% csrf_token %}
+          <input type="text" name="name" placeholder="ชื่อ-นามสกุล" class="w-full p-3 border rounded-lg" required>
+          <input type="text" name="phone" placeholder="เบอร์โทรศัพท์" class="w-full p-3 border rounded-lg" required>
+          <input type="text" name="address_line1" placeholder="ที่อยู่บรรทัดที่ 1" class="w-full p-3 border rounded-lg" required>
+          <input type="text" name="address_line2" placeholder="ที่อยู่บรรทัดที่ 2 (ถ้ามี)" class="w-full p-3 border rounded-lg">
+          <input type="text" name="sub_district" placeholder="ตำบล / แขวง" class="w-full p-3 border rounded-lg" required>
+          <input type="text" name="district" placeholder="อำเภอ / เขต" class="w-full p-3 border rounded-lg" required>
+          <input type="text" name="province" placeholder="จังหวัด" class="w-full p-3 border rounded-lg" required>
+          <input type="text" name="postal_code" placeholder="รหัสไปรษณีย์" class="w-full p-3 border rounded-lg" required>
+  
+          <div class="mt-6">
+            <button type="submit" class="w-full bg-pink-500 text-white py-4 rounded-lg font-semibold shadow-md hover:bg-pink-600 transition">
+              Proceed to Payment
+            </button>
+          </div>
+        </form>
       </div>
-      <form action="{% url 'process_payment' order.id %}" method="POST" class="mt-10">
-        {% csrf_token %}
-        <button type="submit" class="w-full bg-pink-500 text-white py-4 rounded-lg font-semibold shadow-md hover:bg-pink-600 transition">
-            Proceed to Payment
-        </button>
-      </form> <!-- Corrected closing form tag -->
     </div>
   </main>
+  
 
   
   <footer class="bg-gray-800 text-white py-8">
