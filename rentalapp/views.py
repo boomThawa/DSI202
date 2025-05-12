@@ -345,9 +345,8 @@ def remove_cart_item(request, item_id):
         return JsonResponse({'success': True})
     return JsonResponse({'error': 'ลบสินค้าไม่สำเร็จ'}, status=400)
 
-
 def checkout(request):
-    # 1. ตรวจสอบการเข้าสู่ระบบของผู้ใช้
+    # ตรวจสอบการเข้าสู่ระบบของผู้ใช้
     if not request.user.is_authenticated:
         return redirect('login')
 
@@ -355,13 +354,11 @@ def checkout(request):
     order = None
 
     if not order_id:
-        # สร้าง Order ใหม่และบันทึกเพื่อรับ id
         order = Order.objects.create(
             user=request.user,
-            total_price=0.00,  # อ้างอิงจากข้อมูล SQL
+            total_price=0.00,
             created_at=timezone.now(),
-            status='pending' # อ้างอิงจากข้อมูล SQL
-            # เพิ่มฟิลด์อื่นๆ ที่จำเป็น
+            status='pending'
         )
         request.session['order_id'] = order.id
     else:
@@ -371,16 +368,29 @@ def checkout(request):
             messages.error(request, "ไม่พบรายการสั่งซื้อของคุณ")
             return redirect('cart')
 
-    checkout_data = request.session.get('checkout_data', {})
-    if not checkout_data:
-        messages.error(request, "ไม่มีข้อมูลการชำระเงิน")
+    # คำนวณจาก cart ใน session
+    cart = request.session.get('cart', {})
+    if not cart:
+        messages.error(request, "ไม่มีสินค้าในตะกร้า")
         return redirect('cart')
 
-    cart_items = checkout_data.get('cart_items', [])
-    subtotal = checkout_data.get('subtotal', 0)
-    total = checkout_data.get('total', 0)
+    cart_items = []
+    subtotal = 0
 
-    # อัปเดต total_price ของ order (ถ้าจำเป็น)
+    for item_id, item in cart.items():
+        quantity = int(item['quantity'])
+        price = float(item['price'])
+        total_item_price = quantity * price
+        subtotal += total_item_price
+
+        cart_items.append({
+            'id': item_id,
+            'price': price,
+            'quantity': quantity,
+            'total': total_item_price
+        })
+
+    total = subtotal
     order.total_price = total
     order.save()
 
@@ -395,33 +405,6 @@ def checkout(request):
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Order
 
-def checkout_view(request):
-    # เช็คว่าผู้ใช้ล็อกอินหรือยัง
-    if not request.user.is_authenticated:
-        return redirect('login')  # ถ้ายังไม่ล็อกอิน ให้ไปหน้า login
-
-    # เช็คว่ามีสินค้าในตะกร้าหรือไม่
-    if not cart_has_items(request):
-        return redirect('cart')  # ถ้าไม่มีสินค้าในตะกร้า ให้ไปที่หน้าตะกร้า
-
-    # ดึง order_id จาก session
-    order_id = request.session.get('order_id')
-    
-    if order_id:
-        # ถ้าพบ order_id ให้ดึง order จากฐานข้อมูล
-        order = get_object_or_404(Order, id=order_id)
-        
-        # คุณสามารถคำนวณ total ได้ตาม logic ของคุณเอง
-        # ตัวอย่างนี้ใช้ฟิลด์ total_price จากโมเดล (ต้องแน่ใจว่ามีใน Order model)
-        total = order.total_price if hasattr(order, 'total_price') else 0
-        
-        return render(request, 'checkout.html', {
-            'order': order,
-            'total': total,
-        })
-    else:
-        # ถ้าไม่พบ order_id ใน session ให้ redirect ไปยังหน้าหลักหรือหน้าที่เหมาะสม
-        return redirect('home')  # เปลี่ยนเป็นชื่อ path ที่เหมาะสม
 
 # ฟังก์ชันตรวจสอบว่าตะกร้ามีสินค้าหรือไม่
 def cart_has_items(request):
