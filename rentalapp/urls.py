@@ -1,7 +1,8 @@
 #/Users/thawaphorn/Desktop/dsi202-final/rental/rentalapp/urls.py
-from django.urls import path
+from django.urls import path, include  # <<< ต้องมี include ด้วย
 from . import views
-from .views import ProfileView, cart
+from .views import ProfileView, view_cart
+
 
 urlpatterns = [
     # หน้าหลัก
@@ -11,16 +12,14 @@ urlpatterns = [
     path('profile/', ProfileView.as_view(), name='profile'),  # ใช้ CBV สำหรับ Profile
     path('wishlist/', views.wishlist, name='wishlist'),  # ตรวจสอบว่าฟังก์ชันนี้มีอยู่
     path('return/', views.return_outfit, name='return_outfit'),
-    path('account/', views.account, name='account'),
-
-    path('cart/', cart, name='cart'),  # แก้ไขการอ้างอิง cart view
-    path('add_to_cart/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
+    path('cart/', views.view_cart, name='cart'),
+    path('add-to-cart/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
     path('update-cart-quantity/', views.update_cart_quantity, name='update_cart_quantity'),
 
     path('rent_now/<int:product_id>/', views.rent_now, name='rent_now'),
     path('remove-cart-item/<int:item_id>/', views.remove_cart_item, name='remove_cart_item'),
     path('update_rent_days/<int:item_id>/', views.update_rent_days, name='update_rent_days'),
-    path('checkout/', views.checkout, name='checkout'),
+    path('checkout/', views.checkout, name='checkout'),  # เปลี่ยนตรงนี้
     path('invoice/<int:rental_id>/', views.invoice, name='invoice'),
     path('process-payment/<int:order_id>/', views.process_payment, name='process_payment'),
 
@@ -40,7 +39,6 @@ urlpatterns = [
 
     # คอนเทนต์ + แฟชั่น
     path('trends/', views.trend_list, name='trend_list'),
-    path('outfit-search/', views.outfit_search, name='outfit_search'),
 
     # การเข้าสู่ระบบและออกจากระบบ
     path('signup/', views.signup_view, name='signup'),

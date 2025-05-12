@@ -26,40 +26,48 @@
     <h1 class="text-4xl font-extrabold tracking-tight mb-10 text-center text-gray-900 uppercase">
       Your Cart
     </h1>
-
     {% if cart_items %}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
       <div class="lg:col-span-2 space-y-6">
         {% for item in cart_items %}
         <div class="flex items-center bg-white rounded-xl shadow-md p-6 space-x-6 hover:shadow-lg transition relative">
-          <a href="{% url 'product_detail' item.id %}" class="block shrink-0">
-            <img src="{{ item.image }}" alt="{{ item.name }}" class="w-28 h-28 rounded-lg object-cover">
+          <a href="{% url 'product_detail' item.product.id %}" class="block shrink-0">
+            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="w-28 h-28 rounded-lg object-cover">
           </a>
           <div class="flex-1">
             <h2 class="text-xl font-semibold text-gray-800">
-              <a href="{% url 'product_detail' item.id %}" class="hover:text-pink-500">{{ item.name }}</a>
+              <a href="{% url 'product_detail' item.product.id %}" class="hover:text-pink-500">{{ item.product.name }}</a>
             </h2>
-            <p class="text-pink-500 font-semibold">฿{{ item.price }}</p>
+            <p class="text-pink-500 font-semibold">฿{{ item.product.price }} / วัน</p>
             <p class="text-sm text-gray-500">In Stock</p>
+            <div class="mt-2">
+              <p class="text-sm text-gray-700">ขนาด: {{ item.size }}</p>
+              <p class="text-sm text-gray-700">สี: {{ item.color }}</p>
+              <p class="text-sm text-gray-700">วันที่เช่า: {{ item.start_date }}</p>
+              <p class="text-sm text-gray-700">จำนวนวันเช่า: {{ item.rent_days }} วัน</p>
+            </div>
             <div class="mt-4 flex items-center space-x-4">
               <div class="flex items-center space-x-2">
-                <button class="decrease-quantity px-2 py-1 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300" data-product-id="{{ item.id }}">-</button>
-                <input type="number" value="{{ item.quantity }}" class="w-12 text-center border rounded-md focus:outline-pink-500 quantity-input" data-product-id="{{ item.id }}" min="1">
-                <button class="increase-quantity px-2 py-1 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300" data-product-id="{{ item.id }}">+</button>
+                <button class="decrease-quantity px-2 py-1 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300" data-product-id="{{ item.product.id }}">-</button>
+                <input type="number" value="{{ item.quantity }}" class="w-12 text-center border rounded-md focus:outline-pink-500 quantity-input" data-product-id="{{ item.product.id }}" min="1">
+                <button class="increase-quantity px-2 py-1 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300" data-product-id="{{ item.product.id }}">+</button>
               </div>
-              <button class="remove-item text-sm text-gray-500 hover:text-pink-500" data-product-id="{{ item.id }}" data-url="{% url 'remove_cart_item' item.id %}">Remove</button>
+              <button class="remove-item text-sm text-gray-500 hover:text-pink-500" data-product-id="{{ item.product.id }}" data-url="{% url 'remove_cart_item' item.id %}">Remove</button>
             </div>
+          </div>
+          <div class="absolute top-2 right-2 bg-pink-100 text-pink-700 py-1 px-2 rounded-md text-sm font-semibold">
+            รวม: ฿{{ item.total_price|floatformat:2 }}
           </div>
         </div>
         {% endfor %}
       </div>
-
+    
       <div class="bg-white p-6 rounded-xl shadow-md">
         <h2 class="text-2xl font-bold text-gray-800 mb-4">Order Summary</h2>
         <div class="space-y-4">
           <div class="flex justify-between text-gray-700">
             <span>Subtotal</span>
-            <span id="subtotal">฿{{ subtotal }}</span>
+            <span id="subtotal">฿{{ total_price|floatformat:2 }}</span>
           </div>
           <div class="flex justify-between text-gray-700">
             <span>Delivery</span>
@@ -67,7 +75,7 @@
           </div>
           <div class="flex justify-between text-gray-700 border-t pt-4 font-semibold">
             <span>Total</span>
-            <span id="total-price" class="text-pink-500">฿{{ total }}</span>
+            <span id="total-price" class="text-pink-500">฿{{ total_price|floatformat:2 }}</span>
           </div>
         </div>
         {% if cart_items %}
@@ -94,6 +102,7 @@
       </a>
     </div>
     {% endif %}
+
   </div>
 
   <footer class="bg-white text-gray-900 py-8 border-t border-gray-300">

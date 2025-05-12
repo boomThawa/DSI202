@@ -22,10 +22,8 @@
         <a href="{% url 'home' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Studio</a>
         <a href="{% url 'product_list' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Drop</a>
         <a href="{% url 'trend_list' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Trends</a>
-        <a href="{% url 'account' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">My Account</a>
       </div>
       <div class="flex items-center space-x-4">
-        <form action="{% url 'outfit_search' %}" method="get" class="flex items-center space-x-2">
           <input type="text" name="q" class="p-2 border border-gray-300 rounded-md bg-gray-100 placeholder-gray-500 text-sm"
             placeholder="Find your fit..." />
           <button type="submit" class="text-pink-500 text-lg">🔍</button>

@@ -264,82 +264,75 @@ def update_cart_quantity(request):
 
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
+from django.shortcuts import render
+from .models import Product
+from django.shortcuts import render
+from .models import Cart, CartItem
+
+def view_cart(request):
+    if request.user.is_authenticated:
+        try:
+            cart = Cart.objects.get(user=request.user)
+            cart_items = CartItem.objects.filter(cart=cart)
+            total_price = sum(item.total_price() for item in cart_items)
+
+            context = {
+                'cart_items': cart_items,
+                'total_price': total_price,
+                'subtotal': total_price, # โดยทั่วไป Subtotal จะเท่ากับ Total ในกรณีที่ไม่มีส่วนลด/ค่าส่ง
+            }
+            return render(request, 'rentalapp/cart.html', context)
+        except Cart.DoesNotExist:
+            context = {
+                'cart_items': [],
+                'total_price': 0,
+                'subtotal': 0,
+            }
+            return render(request, 'rentalapp/cart.html', context)
+    else:
+        # Handle กรณีผู้ใช้ไม่ได้ Login (อาจจะ Redirect ไปหน้า Login หรือแสดง Cart จาก Session)
+        # สำหรับตัวอย่างนี้ จะส่ง Cart ว่าง
+        context = {
+            'cart_items': [],
+            'total_price': 0,
+            'subtotal': 0,
+        }
+        return render(request, 'rentalapp/cart.html', context)
+
+    
 
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from .models import Product
-@login_required
+
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import Product, Cart, CartItem
+from django.utils import timezone
 
 def add_to_cart(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-
-    if request.method == "POST":
-        quantity = int(request.POST.get("quantity", 1))
-
-        # Check stock availability
-        if not product.is_in_stock(quantity):
-            messages.error(request, "Not enough stock available.")
-            return redirect("product_detail", product_id=product.id)
-
-        # Add product to cart (example cart logic)
-        cart = request.session.get("cart", {})
-        if product_id in cart:
-            cart[product_id]["quantity"] += quantity
-        else:
-            cart[product_id] = {"quantity": quantity, "name": product.name, "price": float(product.price)}
-
-        # Save updated cart in session
-        request.session["cart"] = cart
-
-        # Reduce stock
-        product.reduce_stock(quantity)
-
-        messages.success(request, f"{product.name} added to cart.")
-        return redirect("product_detail", product_id=product.id)
+    # ดึงสินค้า
+    product = Product.objects.get(id=product_id)
+    
+    # ตรวจสอบว่าผู้ใช้มี Cart หรือยัง
+    cart, created = Cart.objects.get_or_create(user=request.user)
+    
+    # รับข้อมูลจากฟอร์ม
+    size = request.POST.get('size')
+    quantity = int(request.POST.get('quantity', 1))
+    start_date = request.POST.get('start_date')
+    rent_days = int(request.POST.get('rent_days', 1))
+    return_date = request.POST.get('return_date')
+    return_date=return_date if return_date else None  # ตั้งค่าเป็น None ถ้าไม่มีค่า
 
 
-@login_required
-def cart(request):
-    session_cart = request.session.get('cart', {})
-    cart_items = []
-
-    # ดึงข้อมูลสินค้าในตะกร้า
-    for product_id, item in session_cart.items():
-        try:
-            product = Product.objects.get(id=product_id)
-            cart_items.append({
-                'id': product.id,
-                'name': product.name,
-                'price': item['price'],
-                'image': product.image.url if product.image else None,
-                'quantity': item['quantity'],
-                'total_price': float(item['price']) * item['quantity']
-            })
-        except Product.DoesNotExist:
-            continue
-
-    # คำนวณยอดรวมทั้งหมด
-    subtotal = sum(item['total_price'] for item in cart_items)
-    total = subtotal  # เพิ่มค่าขนส่งหรือส่วนลดได้ในอนาคต
-
-    # เก็บข้อมูลใน Session เพื่อใช้ใน Checkout
-    request.session['checkout_data'] = {
-        'cart_items': cart_items,
-        'subtotal': subtotal,
-        'total': total,
-    }
-
-    # ตรวจสอบว่า checkout_data มีข้อมูลหรือไม่
-    checkout_data = request.session.get('checkout_data', {})
-    if not checkout_data:
-        messages.error(request, "ไม่มีข้อมูลการชำระเงิน")
-        return redirect('cart')  # เปลี่ยนไปหน้าตะกร้า
-
-    return render(request, 'rental/cart.html', {
-        'cart_items': cart_items,
-        'subtotal': subtotal,
-        'total': total,
-    })
+    # สร้าง CartItem ใหม่
+    cart_item = CartItem(cart=cart, product=product, quantity=quantity, size=size, start_date=start_date, rent_days=rent_days, return_date=return_date)
+    cart_item.save()
+    
+    # รีไดเร็กไปที่หน้าตะกร้าสินค้า
+    return redirect('cart')
 
 @login_required
 def remove_cart_item(request, item_id):
@@ -436,14 +429,23 @@ def cart_has_items(request):
     return len(cart) > 0
 
 
-# Rent Now
 from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib.auth.decorators import login_required
+from .models import Product, Checkout
+
 @login_required
 def rent_now(request, product_id):
     product = get_object_or_404(Product, id=product_id)
 
     if request.method == "POST":
-        rent_days = int(request.POST.get("rent_days", 1))
+        rent_days = request.POST.get("rent_days", "")
+
+        # ตรวจสอบว่า rent_days เป็นตัวเลขหรือไม่ ถ้าไม่เป็นตัวเลขให้ใช้ค่า default เป็น 1
+        if rent_days.isdigit():
+            rent_days = int(rent_days)
+        else:
+            rent_days = 1  # ค่า default ถ้าไม่ได้รับข้อมูลที่เป็นตัวเลข
 
         # ตรวจสอบว่าสินค้ามีให้เช่าหรือไม่
         if not product.is_available:
@@ -465,6 +467,7 @@ def rent_now(request, product_id):
         return redirect('checkout', checkout_id=checkout.id)
 
     return render(request, 'rental/product_detail.html', {'product': product})
+
 
 # Update Rent Days
 @login_required
@@ -643,6 +646,13 @@ def check_payment(request):
 # rentalapp/views.py
 from django.shortcuts import render
 
+from .models import Rental  # สมมติว่ามี Model ชื่อ Rental
+from django.shortcuts import render
+from .models import Rental
+
 def rental_history(request):
-    # Your logic for handling rental history
-    return render(request, 'rentalapp/rental_history.html')
+    if request.user.is_authenticated:
+        history_data = Rental.objects.filter(user=request.user).order_by('-created_at')
+        return render(request, 'rental/rental_history.html', {'history_items': history_data})
+    else:
+        return render(request, 'rental/login_required.html')

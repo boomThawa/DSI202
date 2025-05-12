@@ -1,37 +1,55 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ประวัติการเช่า - MindVibe</title>
+    <title>ประวัติการเช่า</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body class="bg-gray-100 text-gray-900 font-[Prompt]">
-    <div class="container mx-auto p-8 mt-10">
-        <h1 class="text-3xl font-bold text-indigo-600 mb-6">ประวัติการเช่า</h1>
+    </head>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
 
-        {% if rentals %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for rental in rentals %}
-                    {% if rental.is_payment_verified %}
-                        <div class="bg-white rounded-lg shadow-md p-6">
-                            <h2 class="text-xl font-semibold text-indigo-700 mb-2">รายการเช่า #{{ rental.id }}</h2>
-                            <p class="text-gray-600 mb-1">วันที่เช่า: {{ rental.start_date }}</p>
-                            <p class="text-gray-600 mb-1">ยอดรวม: {{ rental.total_price }} บาท</p>
-                            <p class="text-green-600 font-semibold mb-1">สถานะ: ชำระเงินแล้ว</p>
-                            <p class="text-gray-600 mb-1">วันที่ชำระเงิน: {{ rental.payment_verified_date|date:"d/m/Y H:i" }}</p>
-                            <a href="{% url 'invoice' rental.id %}" class="inline-block mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-sm">ดูใบเสร็จ</a>
-                            <a href="{% url 'return_request' rental.id %}" class="inline-block mt-2 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-sm">แจ้งคืนสินค้า</a>
-                        </div>
-                    {% endif %}
-                {% endfor %}
+    <div class="container mx-auto mt-10">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">ประวัติการเช่าของคุณ</h1>
+
+        {% if history_items %}
+            <div class="bg-white shadow-md rounded my-6">
+                <table class="min-w-max w-full table-auto">
+                    <thead>
+                        <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                            <th class="py-3 px-6 text-left">ID การเช่า</th>
+                            <th class="py-3 px-6 text-left">วันที่สร้าง</th>
+                            <th class="py-3 px-6 text-left">สินค้า</th>
+                            <th class="py-3 px-6 text-left">ขนาด</th>
+                            <th class="py-3 px-6 text-left">สี</th>
+                            <th class="py-3 px-6 text-center">จำนวนวันเช่า</th>
+                            <th class="py-3 px-6 text-right">ราคารวม</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-600 text-sm font-light">
+                        {% for rental in history_items %}
+                        <tr class="border-b border-gray-200 hover:bg-gray-100">
+                            <td class="py-3 px-6 text-left whitespace-nowrap">{{ rental.id }}</td>
+                            <td class="py-3 px-6 text-left whitespace-nowrap">{{ rental.created_at }}</td>
+                            <td class="py-3 px-6 text-left">{{ rental.product.name }}</td>
+                            <td class="py-3 px-6 text-left">{{ rental.size }}</td>
+                            <td class="py-3 px-6 text-left">{{ rental.color }}</td>
+                            <td class="py-3 px-6 text-center">{{ rental.rent_days }}</td>
+                            <td class="py-3 px-6 text-right">{{ rental.total_price }} บาท</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                </table>
             </div>
         {% else %}
-            <p class="text-gray-500 text-center">ไม่มีประวัติการเช่า</p>
+            <p class="text-center">ไม่มีประวัติการเช่า</p>
         {% endif %}
     </div>
-</body>
+
+    <footer class="bg-gray-200 text-center py-4 text-sm text-gray-600 mt-8">
+        <p>&copy; 2024 MindVibe. All rights reserved.</p>
+    </footer>
+
+    </body>
 </html>

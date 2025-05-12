@@ -33,9 +33,11 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
 class Category(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
+    image = models.ImageField(upload_to='category_images/', blank=True, null=True)  # เพิ่มฟิลด์นี้
 
     def __str__(self):
         return self.name
+
 
 
 # Product Model
@@ -109,8 +111,10 @@ class CartItem(models.Model):
     size = models.CharField(max_length=20)
     color = models.CharField(max_length=20)
     quantity = models.PositiveIntegerField(default=1)
-    rent_days = models.PositiveIntegerField(default=3)
     start_date = models.DateField()
+    rent_days = models.PositiveIntegerField(default=1)
+    start_date = models.DateField()
+    return_date = models.DateField(null=True, blank=True)  # ตรวจสอบให้ถูกต้อง
 
     def total_price(self):
         return self.product.price * self.quantity * self.rent_days
