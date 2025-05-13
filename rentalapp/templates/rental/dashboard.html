@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>แดชบอร์ดผู้ใช้</title>
+</head>
+<body>
+    <h2>แดชบอร์ดของ {{ user.username }}</h2>
+
+    <h3>ประวัติการเช่า</h3>
+    <ul>
+        {% for order in orders %}
+            <li>ออเดอร์ #{{ order.id }} - สถานะ: {{ order.status }}</li>
+        {% endfor %}
+    </ul>
+
+    <h3>รีวิวที่คุณให้ไว้</h3>
+    <ul>
+        {% for review in reviews %}
+            <li>สินค้าที่คุณรีวิว: {{ review.product.name }} - {{ review.rating }} ดาว</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

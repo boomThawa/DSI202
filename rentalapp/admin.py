@@ -65,6 +65,9 @@ class CustomUserAdmin(BaseUserAdmin):
 from django.contrib import admin
 from .models import Product, Category, Rental
 
+from django.contrib import admin
+from .models import Product, Category, Rental
+
 class RentalAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'product', 'start_date', 'total_price', 'is_payment_verified', 'payment_verified_date')
     list_editable = ('is_payment_verified',) # ให้ Admin แก้ไข is_payment_verified ได้โดยตรง
@@ -75,7 +78,22 @@ class RentalAdmin(admin.ModelAdmin):
             obj.payment_verified_date = timezone.now()
         super().save_model(request, obj, form, change)
 
-admin.site.register(Rental, RentalAdmin)
+from django.contrib.admin.views.decorators import staff_member_required
+
+@staff_member_required
+def admin_pending_payments(request):
+    pending_orders = Order.objects.filter(status='pending_confirmation')
+    return render(request, 'admin/pending_payments.html', {'pending_orders': pending_orders})
+
+@staff_member_required
+def admin_approve_payment(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    if order.status == 'pending_confirmation':
+        order.status = 'paid'
+        order.save()
+        messages.success(request, f"อนุมัติการชำระเงินสำหรับออเดอร์ #{order.id} แล้ว")
+        # อาจมีการส่งอีเมลแจ้งเตือนผู้ใช้ที่นี่
+    return redirect
 
 # Unregister and Re-register User with CustomUserAdmin
 admin.site.unregister(User)

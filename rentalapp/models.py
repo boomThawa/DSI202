@@ -191,7 +191,7 @@ class Return(models.Model):
         ('rejected', 'Rejected'),
         ('processing', 'Processing'),
     ]
-
+    payment_status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('paid', 'Paid')], default='pending')
     order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='returns')
     status = models.CharField(max_length=13, choices=STATUS_CHOICES, default='pending')
     review = models.TextField(blank=True, help_text="Provide feedback or reason for return.")
@@ -275,3 +275,27 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.product.name} × {self.quantity} ({self.rent_days} days)"
+    
+from django.db import models
+from django.contrib.auth.models import User
+from .models import Order, Product
+
+
+class Review(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    rating = models.PositiveIntegerField()  # 1 ถึง 5 ดาว
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    review_text = models.TextField()  # ตรวจสอบให้แน่ใจว่าฟิลด์นี้มีอยู่
+
+from django import forms
+from .models import Review
+
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ['rating', 'review_text']
+        widgets = {
+            'review_text': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
+        }

@@ -56,6 +56,7 @@
       <div class="bg-white p-8 rounded-xl shadow-md">
         <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-3">Shipping Address</h2>
         <form action="{% url 'process_payment' order.id %}" method="POST" class="space-y-4">
+
           {% csrf_token %}
           <input type="text" name="name" placeholder="ชื่อ-นามสกุล" class="w-full p-3 border rounded-lg" required>
           <input type="text" name="phone" placeholder="เบอร์โทรศัพท์" class="w-full p-3 border rounded-lg" required>

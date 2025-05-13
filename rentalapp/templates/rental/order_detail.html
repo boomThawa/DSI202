@@ -35,9 +35,20 @@
 
     <!-- ถ้ามีสินค้าหรือรายการเช่าในอนาคต สามารถใส่ตารางสินค้าได้ที่นี่ -->
 
+
+    <nav>
+        <ul>
+            {% for order in orders %}
+                <li>
+                    <a href="{% url 'review' order_id=order.id %}">Review Order {{ order.id }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </nav>
     <div class="text-right mt-8">
-      <a href="{% url 'rental_history' %}" class="text-pink-500 hover:underline text-sm">← กลับไปหน้าประวัติการเช่า</a>
-    </div>
+        <a href="{% url 'rental_history' %}" class="text-pink-500 hover:underline text-sm">← กลับไปหน้าประวัติการเช่า</a>
+      </div>  
+
   </main>
 
   <footer class="text-center text-sm text-gray-500 py-6 mt-12">

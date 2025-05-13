@@ -6,3 +6,5 @@ django-extensions
 psycopg2
 qrcode[pil]
 promptpay
+django-allauth  # ลบเวอร์ชันที่ระบุไปเลย
+social-auth-app-django

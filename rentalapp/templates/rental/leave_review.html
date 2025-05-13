@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>รีวิวการเช่า</title>
+</head>
+<body>
+    <h2>รีวิวสินค้าหรือบริการของคุณ</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">ส่งรีวิว</button>
+    </form>
+</body>
+</html>

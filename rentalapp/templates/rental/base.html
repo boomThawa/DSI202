@@ -29,7 +29,7 @@
       <a href="{% url 'home' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Studio</a>
       <a href="{% url 'product_list' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Drop</a>
       <a href="{% url 'trend_list' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Trends</a>
-      <a href="{% url 'rental_history' %}">ประวัติการเช่า</a>
+      <a href="{% url 'rental_history' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">rentalhistory</a>
 
     </div>
 
@@ -48,7 +48,7 @@
       </form>
 
       <!-- Cart and Wishlist Icons -->
-      <a href="{% url 'cart' %}" class="text-gray-900 hover:text-pink-500 text-xl">🛒</a>
+      <a href="{% url 'cart' %}" class="text-gray-900 hover:text-pink-500 text-xl">🛒</a> 
       <a href="{% url 'wishlist' %}" class="text-gray-900 hover:text-pink-500 text-xl">❤️</a>
     </div>
   </div>
@@ -120,34 +120,39 @@
   </div>
 </section>
 
-
-  <!-- Categories Section -->
-  <section class="bg-gray-100 py-20">
-    <div class="max-w-7xl mx-auto px-4">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-3xl font-bold text-pink-500 uppercase">Capsules</h2>
-        <a href="{% url 'category_list' %}" class="text-pink-600 hover:underline text-sm font-medium">See All →</a>
-      </div>
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
-        <a href="{% url 'category_list' %}" class="hover:scale-105 transition">
-          <img src="{% static 'rental/image/Accessories.png' %}" class="mx-auto rounded-full" alt="Accessories" />
-          <p class="mt-2 text-gray-900">Accessories</p>
-        </a>
-        <a href="{% url 'category_list' %}" class="hover:scale-105 transition">
-          <img src="{% static 'rental/image/Party-Night.png' %}" class="mx-auto rounded-full" alt="Party Night" />
-          <p class="mt-2 text-gray-900">Party Night</p>
-        </a>
-        <a href="{% url 'category_list' %}" class="hover:scale-105 transition">
-          <img src="{% static 'rental/image/Matching-Set.png' %}" class="mx-auto rounded-full" alt="Matching Set" />
-          <p class="mt-2 text-gray-900">Matching Set</p>
-        </a>
-        <a href="{% url 'category_list' %}" class="hover:scale-105 transition">
-          <img src="{% static 'rental/image/Winter-Vacation.png' %}" class="mx-auto rounded-full" alt="Winter Vacation" />
-          <p class="mt-2 text-gray-900">Winter Vacation</p>
-        </a>
-      </div>
+<!-- Categories Section -->
+<section class="bg-gray-50 py-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-10">
+      <h2 class="text-4xl font-extrabold text-pink-500 uppercase tracking-wide">Capsules</h2>
+      <!-- Optional link to view all categories -->
+      {# <a href="{% url 'category_images' %}" class="mt-2 sm:mt-0 text-pink-600 hover:underline text-sm font-medium">See All →</a> #}
     </div>
-  </section>
+
+    <!-- Grid of Categories -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+      {% for category in categories %}
+        <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 text-center">
+          <div class="mb-4">
+            {% if category.image %}
+              <img src="{{ category.image.url }}" alt="{{ category.name }}" class="w-full h-48 object-cover rounded-xl">
+            {% else %}
+              <div class="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400 rounded-xl">
+                No image
+              </div>
+            {% endif %}
+          </div>
+          <h3 class="text-lg font-semibold text-gray-800">{{ category.name }}</h3>
+          {% if category.description %}
+            <p class="mt-2 text-sm text-gray-500">{{ category.description }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
 
   <!-- Footer -->
   <footer class="bg-white text-neutral-900 py-16 mt-20 border-t border-zinc-200">

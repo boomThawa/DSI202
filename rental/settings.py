@@ -30,10 +30,18 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'django.contrib.sites',
+    #'allauth',
+    #'allauth.account',
+    #'allauth.socialaccount',
+    'social_django',
     'rentalapp',  # ควรมี rentalapp อยู่ในนี้
     
 ]
+ 
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # ค่า Default
 
+SITE_ID = 1
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -43,6 +51,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'social_django.middleware.SocialAuthExceptionMiddleware',
 ]
 
 ROOT_URLCONF = 'rental.urls'
@@ -58,10 +67,13 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
 ]
+
 
 
 WSGI_APPLICATION = "rental.wsgi.application"
@@ -106,6 +118,21 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    #'allauth.account.auth_backends.AuthenticationBackend',
+    'social_core.backends.google.GoogleOAuth2',
+
+]
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '69226887281-821ta93itabg2he4gakjsn5q3hcekana.apps.googleusercontent.com'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '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'
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['email', 'profile'] # ตัวอย่าง Scope
+# ระบุ URL ที่ใช้สำหรับการเชื่อมต่อ
+SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = 'http://localhost:8000/auth/complete/google-oauth2/'
+LOGIN_REDIRECT_URL = '/'  # หรือเส้นทางที่คุณต้องการให้ผู้ใช้ไปหลังจากล็อกอินสำเร็จ
 
 
 # Internationalization

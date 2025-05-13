@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Review for Order #{{ order.id }}</title>
+</head>
+<body>
+    <h1>Order #{{ order.id }}</h1>
+    <p>Order details:</p>
+    <ul>
+        <li>Product: {{ order.product.name }}</li>
+        <li>Quantity: {{ order.quantity }}</li>
+        <li>Total Price: ${{ order.total_price }}</li>
+        <!-- รายละเอียดอื่น ๆ ของการสั่งซื้อที่ต้องการแสดง -->
+    </ul>
+
+    <h2>Leave a Review</h2>
+    {% if user.is_authenticated %}
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Submit Review</button>
+        </form>
+    {% else %}
+        <p>You need to be logged in to leave a review.</p>
+    {% endif %}
+</body>
+</html>

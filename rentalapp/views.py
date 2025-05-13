@@ -13,7 +13,9 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
-
+from .models import Category
+from django.shortcuts import render, get_object_or_404, redirect
+# ... imports อื่นๆ ...
 
 # Invoice
 @login_required
@@ -60,6 +62,13 @@ def signup_view(request):
     else:
         form = UserCreationForm()
     return render(request, 'registration/signup.html', {'form': form})
+
+from django.shortcuts import render
+from .models import Category
+
+def category_images(request):
+    categories = Category.objects.all()
+    return render(request, 'rental/category_images.html', {'categories': categories})
 
 @method_decorator(login_required, name='dispatch')
 class ProfileView(TemplateView):
@@ -108,6 +117,7 @@ from .models import Product
 
 def home(request):
     # ดึงสินค้าที่ถูกกำหนดให้เป็นสินค้ายอดนิยม (Featured Products)
+    categories = Category.objects.all()
     featured_products = Product.objects.filter(is_featured=True)[:3]
     
     # ตรวจสอบและเตรียมข้อมูลสินค้าที่จะแสดงใน Template
@@ -137,6 +147,7 @@ def home(request):
         'welcome_message': 'Welcome to the Fashion Rental Platform!',
         'featured_products': featured_products,
         'gallery_images': gallery_images,
+        'categories': categories,
     }
     return render(request, 'rental/base.html', context)
 
@@ -222,193 +233,6 @@ def product_detail(request, product_id):
         'empty_stars': empty_stars
     })
 
-# Cart Views
-from decimal import Decimal
-from django.http import JsonResponse
-
-@login_required
-def update_cart_quantity(request):
-    if request.method == 'POST':
-        import json
-        data = json.loads(request.body)
-        product_id = str(data.get('product_id'))
-        quantity = int(data.get('quantity', 1))
-
-        cart = request.session.get('cart', {})
-        product = get_object_or_404(Product, id=product_id)
-
-        if not product.is_available:
-            return JsonResponse({'success': False, 'error': 'Product is not available'})
-
-        if quantity > product.stock:
-            return JsonResponse({'success': False, 'error': f'Only {product.stock} items available'})
-
-        if product_id in cart:
-            if quantity > 0:
-                cart[product_id]['quantity'] = quantity
-            else:
-                del cart[product_id]
-        else:
-            cart[product_id] = {
-                'price': str(product.price),  # Store price as string to avoid serialization issues
-                'quantity': quantity
-            }
-
-        request.session['cart'] = cart
-
-        # Calculate subtotal and total
-        subtotal = sum(Decimal(item['price']) * item['quantity'] for item in cart.values())
-        total = subtotal  # Add delivery cost here if necessary
-
-        return JsonResponse({'success': True, 'subtotal': float(subtotal), 'total': float(total)})
-
-    return JsonResponse({'success': False, 'error': 'Invalid request method'})
-
-from django.shortcuts import render
-from .models import Product
-from django.shortcuts import render
-from .models import Cart, CartItem
-
-def view_cart(request):
-    if request.user.is_authenticated:
-        try:
-            cart = Cart.objects.get(user=request.user)
-            cart_items = CartItem.objects.filter(cart=cart)
-            total_price = sum(item.total_price() for item in cart_items)
-
-            context = {
-                'cart_items': cart_items,
-                'total_price': total_price,
-                'subtotal': total_price, # โดยทั่วไป Subtotal จะเท่ากับ Total ในกรณีที่ไม่มีส่วนลด/ค่าส่ง
-            }
-            return render(request, 'rentalapp/cart.html', context)
-        except Cart.DoesNotExist:
-            context = {
-                'cart_items': [],
-                'total_price': 0,
-                'subtotal': 0,
-            }
-            return render(request, 'rentalapp/cart.html', context)
-    else:
-        # Handle กรณีผู้ใช้ไม่ได้ Login (อาจจะ Redirect ไปหน้า Login หรือแสดง Cart จาก Session)
-        # สำหรับตัวอย่างนี้ จะส่ง Cart ว่าง
-        context = {
-            'cart_items': [],
-            'total_price': 0,
-            'subtotal': 0,
-        }
-        return render(request, 'rentalapp/cart.html', context)
-
-    
-
-from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib import messages
-from .models import Product
-
-from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from .models import Product, Cart, CartItem
-from django.utils import timezone
-@login_required
-
-def add_to_cart(request, product_id):
-    # ดึงสินค้า
-    product = Product.objects.get(id=product_id)
-    
-    # ตรวจสอบว่าผู้ใช้มี Cart หรือยัง
-    cart, created = Cart.objects.get_or_create(user=request.user)
-    
-    # รับข้อมูลจากฟอร์ม
-    size = request.POST.get('size')
-    quantity = int(request.POST.get('quantity', 1))
-    start_date = request.POST.get('start_date')
-    rent_days = int(request.POST.get('rent_days', 1))
-    return_date = request.POST.get('return_date')
-    return_date=return_date if return_date else None  # ตั้งค่าเป็น None ถ้าไม่มีค่า
-
-
-    # สร้าง CartItem ใหม่
-    cart_item = CartItem(cart=cart, product=product, quantity=quantity, size=size, start_date=start_date, rent_days=rent_days, return_date=return_date)
-    cart_item.save()
-    
-    # รีไดเร็กไปที่หน้าตะกร้าสินค้า
-    return redirect('cart')
-
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from .models import CartItem
-
-def remove_cart_item(request, item_id):
-    if request.method == 'POST':
-        cart_item = get_object_or_404(CartItem, pk=item_id)
-        cart_item.delete()
-        return JsonResponse({'success': True})
-    return JsonResponse({'error': 'ลบสินค้าไม่สำเร็จ'}, status=400)
-
-from .models import Product  # สมมุติว่าคุณมี model นี้
-
-def checkout(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-
-    order_id = request.session.get('order_id')
-    if not order_id:
-        order = Order.objects.create(
-            user=request.user,
-            total_price=0.00,
-            created_at=timezone.now(),
-            status='pending'
-        )
-        request.session['order_id'] = order.id
-    else:
-        try:
-            order = Order.objects.get(id=order_id, user=request.user)
-        except Order.DoesNotExist:
-            messages.error(request, "ไม่พบรายการสั่งซื้อของคุณ")
-            return redirect('cart')
-
-    cart = request.session.get('cart', {})
-    if not cart:
-        messages.error(request, "ไม่มีสินค้าในตะกร้า")
-        return redirect('cart')
-
-    cart_items = []
-    subtotal = 0
-
-    for item_id, item in cart.items():
-        quantity = int(item['quantity'])
-        price = float(item['price'])
-        total_item_price = quantity * price
-        subtotal += total_item_price
-
-        # ดึงชื่อสินค้าจาก model
-        try:
-            product = Product.objects.get(id=item_id)
-            name = product.name
-        except Product.DoesNotExist:
-            name = "Unknown Product"
-
-        cart_items.append({
-            'id': item_id,
-            'name': name,
-            'price': price,
-            'quantity': quantity,
-            'total_price': total_item_price
-        })
-
-    total = subtotal
-    order.total_price = total
-    order.save()
-
-    return render(request, 'rental/checkout.html', {
-        'cart_items': cart_items,
-        'subtotal': subtotal,
-        'total': total,
-        'order': order,
-    })
-
-
 
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Order
@@ -424,7 +248,6 @@ def cart_has_items(request):
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
-from .models import Product, Checkout
 
 @login_required
 def rent_now(request, product_id):
@@ -508,44 +331,221 @@ def thank_you(request):
     return render(request, 'thank_you.html')
 
 
-from .models import Cart, CartItem, Checkout, Product
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Cart, CartItem, Order, OrderItem
+from django.utils import timezone
+from django.contrib import messages
 
+from decimal import Decimal
+from django.http import JsonResponse
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Cart, CartItem, Product, Order, OrderItem
+from django.utils import timezone
+from django.contrib import messages
+
+@login_required
+def add_to_cart(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    cart, created = Cart.objects.get_or_create(user=request.user)
+
+    size = request.POST.get('size')
+    try:
+        quantity = int(request.POST.get('quantity', 1))
+    except (ValueError, TypeError):
+        quantity = 1
+
+    start_date = request.POST.get('start_date')
+    try:
+        rent_days = int(request.POST.get('rent_days', 1))
+    except (ValueError, TypeError):
+        rent_days = 1
+
+    return_date = request.POST.get('return_date')
+    return_date = return_date if return_date else None
+
+    # ตรวจสอบว่าสินค้าเดิมในตะกร้ามีตัวเลือกเดียวกันหรือไม่
+    cart_item, created = CartItem.objects.get_or_create(
+        cart=cart,
+        product=product,
+        size=size,
+        start_date=start_date,
+        rent_days=rent_days,
+        defaults={'quantity': quantity, 'return_date': return_date}
+    )
+
+    # ถ้ามีสินค้าเดิมอยู่แล้ว ให้เพิ่มจำนวน
+    if not created:
+        cart_item.quantity += quantity
+        cart_item.save()
+
+    return redirect('cart')
+
+@login_required
+def view_cart(request):
+    try:
+        cart = Cart.objects.get(user=request.user)
+        cart_items = CartItem.objects.filter(cart=cart).select_related('product')  # เพิ่มประสิทธิภาพ
+        total_price = sum(item.total_price() for item in cart_items)
+
+        context = {
+            'cart_items': cart_items,
+            'total_price': total_price,
+            'subtotal': total_price,
+        }
+        return render(request, 'rentalapp/cart.html', context)
+    except Cart.DoesNotExist:
+        context = {
+            'cart_items': [],
+            'total_price': 0,
+            'subtotal': 0,
+        }
+        return render(request, 'rentalapp/cart.html', context)
+
+@login_required
+def update_cart_quantity(request):
+    if request.method == 'POST':
+        import json
+        data = json.loads(request.body)
+        product_id = str(data.get('product_id'))
+        quantity = int(data.get('quantity', 1))
+
+        cart = request.session.get('cart', {})
+        product = get_object_or_404(Product, id=product_id)
+
+        if not product.is_available:
+            return JsonResponse({'success': False, 'error': 'Product is not available'})
+
+        if quantity > product.stock:
+            return JsonResponse({'success': False, 'error': f'Only {product.stock} items available'})
+
+        if product_id in cart:
+            if quantity > 0:
+                cart[product_id]['quantity'] = quantity
+            else:
+                del cart[product_id]
+        else:
+            cart[product_id] = {
+                'price': str(product.price),  # Store price as string to avoid serialization issues
+                'quantity': quantity
+            }
+
+        request.session['cart'] = cart
+
+        # Calculate subtotal and total
+        subtotal = sum(Decimal(item['price']) * item['quantity'] for item in cart.values())
+        total = subtotal  # Add delivery cost here if necessary
+
+        return JsonResponse({'success': True, 'subtotal': float(subtotal), 'total': float(total), 'quantity': quantity})  # ส่ง quantity กลับไปด้วย
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+
+@login_required
+def remove_cart_item(request, item_id):
+    if request.method == 'POST':
+        try:
+            cart_item = get_object_or_404(CartItem, pk=item_id, cart__user=request.user)
+            cart_item.delete()
+            return JsonResponse({'success': True})
+        except CartItem.DoesNotExist:
+            return JsonResponse({'error': 'ไม่พบสินค้าในตะกร้าของคุณ'}, status=404)
+    return JsonResponse({'error': 'ลบสินค้าไม่สำเร็จ'}, status=400)
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Cart, CartItem, Order
+from django.utils import timezone
+from django.contrib import messages
+from decimal import Decimal  # Import Decimal
+
+@login_required
+def checkout(request):
+    try:
+        # ดึง cart จาก database
+        cart = Cart.objects.get(user=request.user)
+        cart_items = CartItem.objects.filter(cart=cart)
+        total = sum(item.total_price() for item in cart_items)
+
+        # สร้าง Order ใหม่ (หรือดึง Order เก่าถ้ามี)
+        order, created = Order.objects.get_or_create(
+            user=request.user,
+            status='pending',  # หรือสถานะเริ่มต้นที่เหมาะสม
+            defaults={'total_price': total, 'created_at': timezone.now()}
+        )
+        if not created:
+            order.total_price = total
+            order.save()
+
+        context = {
+            'cart_items': cart_items,
+            'total': total,
+            'order': order,
+        }
+
+        # Clear cart data in session (สำคัญ!)
+        request.session['cart'] = {}
+
+        return render(request, 'rentalapp/checkout.html', context)
+
+    except Cart.DoesNotExist:
+        messages.error(request, "ไม่มีสินค้าในตะกร้า")
+        return redirect('cart')
+
+@login_required
 def process_checkout(request):
-    cart = get_object_or_404(Cart, user=request.u_ser)
+    cart = get_object_or_404(Cart, user=request.user)
     cart_items = CartItem.objects.filter(cart=cart)
 
-    for item in cart_items:
-        product = item.product
-        discount_price = product.price - (product.price * (product.discount / 100))
-        total_price = discount_price * item.quantity * item.rent_days
+    if not cart_items:
+        messages.error(request, "ไม่มีสินค้าในตะกร้า")
+        return redirect('cart')
 
-        Checkout.objects.create(
+    if request.method == 'POST':
+        # สร้าง Order ใหม่
+        order = Order.objects.create(
             user=request.user,
-            product=product,
-            rent_days=item.rent_days,
-            total_price=total_price,
+            total_price=sum(item.total_price() for item in cart_items),
             created_at=timezone.now(),
-            is_confirmed=False,
-            status='pending'
+            status='pending' # หรือสถานะเริ่มต้นอื่น ๆ
         )
 
-    cart_items.delete()
-    cart.delete()
+        # สร้าง OrderItem จาก CartItem
+        for item in cart_items:
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                size=item.size,
+                color=item.color,
+                quantity=item.quantity,
+                rent_days=item.rent_days,
+                start_date=item.start_date
+            )
 
-    return redirect('checkout_success')  # หรือหน้า payment
+        # เคลียร์ตะกร้าสินค้าหลังจากสร้าง Order แล้ว (หรืออาจจะเคลียร์หลังจากชำระเงินสำเร็จ)
+        cart_items.delete()
+        cart.delete()
+
+        request.session['order_id'] = order.id # เก็บ order_id เพื่อนำไปใช้ในขั้นตอนถัดไป (เช่น ชำระเงิน)
+        return redirect('checkout') # ไปยังหน้าชำระเงิน
+
+    return redirect('cart') # ถ้าไม่ใช่ POST ให้กลับไปที่หน้าตะกร้า
 
 # views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Order, ShippingAddress
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Order, ShippingAddress, Cart, CartItem  # Import Cart and CartItem
 
 @login_required
 def process_payment(request, order_id):
-    if request.method == 'POST':
-        order = get_object_or_404(Order, id=order_id, user=request.user)
-        checkout_data = request.session.get('checkout_data', {})
-        total = checkout_data.get('total', 0)  # ดึงยอดรวมจาก session
+    order = get_object_or_404(Order, id=order_id, user=request.user)
 
+    if request.method == 'POST':
         # 1. รับค่าจากฟอร์มที่อยู่จัดส่ง
         name = request.POST.get('name')
         phone = request.POST.get('phone')
@@ -577,41 +577,266 @@ def process_payment(request, order_id):
         # 4. TODO: ดำเนินการจ่ายเงินที่นี่ (Stripe, PromptPay หรือระบบอื่น)
         # ...
 
-        # 5. เปลี่ยนสถานะ หรือ redirect ไปหน้าสำเร็จ
-        return render(request, 'rental/payment.html', {'order': order, 'total': total})  # หรือ redirect ไปยังหน้าชำระเงิน
+        # 5. ดึงข้อมูล cart ใหม่จาก database
+        cart = Cart.objects.get(user=request.user)
+        cart_items = CartItem.objects.filter(cart=cart)
+        total = sum(item.total_price() for item in cart_items)
+
+        # 6. ส่งไปยังหน้ายืนยันการชำระเงิน
+        return render(request, 'rentalapp/payment.html', {'order': order, 'total': total, 'cart_items': cart_items})
 
     return redirect('checkout')  # ถ้าไม่ใช่ POST ก็กลับไป checkout
 
 
-from .models import Order
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from .models import Order, ShippingAddress, Cart, CartItem
 from django.contrib import messages
-from .models import Product, Rental, Cart, CartItem
-from django.utils import timezone
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Order, Cart, CartItem, Rental
+from django.contrib import messages
 
 @login_required
 def payment_success(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
+    print(f"payment_success: order_id={order_id}, order.status={order.status}")
 
-    # เปลี่ยนสถานะออเดอร์ หรือทำ logic ต่อที่นี่
-    order.status = 'paid'  # สมมุติว่ามีฟิลด์นี้
-    order.save()
+    if order.status == 'paid':
+        print("payment_success: Order status is 'paid'")
+        cart = get_object_or_404(Cart, user=request.user)
+        cart_items = CartItem.objects.filter(cart=cart)
+        print(f"payment_success: Cart items: {cart_items}")
 
-    return render(request, 'rental/payment_success.html', {'order': order})
+        for item in cart_items:
+            rental = Rental.objects.create(
+                user=request.user,
+                product=item.product,
+                size=item.size,
+                color=item.color,
+                rent_days=item.rent_days,
+                start_date=item.start_date,
+                total_price=item.total_price(),
+                created_at=timezone.now(),
+                is_payment_verified=True
+            )
+            print(f"payment_success: Created rental: {rental.id}")
 
-from django.contrib.auth.decorators import login_required
+        cart_items.delete()
+        cart.delete()
+        messages.success(request, "Payment successful! Your rental has been confirmed.")
+        print(f"payment_success: Redirecting to payment_success.html")
+        return render(request, 'rentalapp/payment_success.html', {'order': order})
+    else:
+        print("payment_success: Order status is NOT 'paid', redirecting to payment_waiting")
+        messages.error(request, "การชำระเงินยังไม่ได้รับการยืนยัน")
+        return redirect('payment_waiting', order_id=order_id)
+    
+
+
+@login_required
+def payment_waiting(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    response = render(request, 'rentalapp/payment_waiting.html', {'order': order})
+    print(f"Response from render: {response}")
+    return response
+
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
 from .models import Order
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def check_payment_status(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return JsonResponse({'status': order.status})
 
 @login_required
 def rental_history(request):
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'rental/history.html', {'orders': orders})
+    """
+    Displays the rental history for the currently logged-in user.
+    """
+    rentals = Rental.objects.filter(user=request.user).order_by('-created_at')
+    # Order by created_at descending to show latest rentals first
+    return render(request, 'rentalapp/history.html', {'rentals': rentals})
 
-from django.contrib.auth.decorators import login_required
-from .models import Order
 
 @login_required
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     return render(request, 'rental/order_detail.html', {'order': order})
+
+
+from .models import Order, Review
+from .forms import ReviewForm
+
+@login_required
+def leave_review(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.user = request.user
+            review.order = order
+            review.save()
+            return redirect('order_history')  # หลังจากรีวิวเสร็จจะไปที่หน้าประวัติการสั่งซื้อ
+    else:
+        form = ReviewForm()
+    return render(request, 'rental/leave_review.html', {'form': form, 'order': order})
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.core.mail import send_mail
+from django.conf import settings
+from .models import Order
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=Order)
+def send_payment_status_update_email(sender, instance, created, **kwargs):
+    if instance.status == 'paid':  # ใช้ status แทน payment_status
+        # ส่งอีเมลหรือทำการอื่น ๆ ตามที่ต้องการ
+        pass
+
+
+from django.shortcuts import render
+from .models import Order, Product
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def user_dashboard(request):
+    # ดึงข้อมูลคำสั่งซื้อและสินค้าที่ผู้ใช้เช่า
+    orders = Order.objects.filter(user=request.user)
+    rented_products = Product.objects.filter(order__user=request.user)
+
+    return render(request, 'dashboard.html', {
+        'orders': orders,
+        'rented_products': rented_products,
+    })
+
+from django.shortcuts import render
+from .forms import ReviewForm
+
+def create_review(request):
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            form.save()  # บันทึกรีวิวลงในฐานข้อมูล
+            return redirect('success')  # เปลี่ยนเป็นเส้นทางที่ต้องการหลังจากบันทึกสำเร็จ
+    else:
+        form = ReviewForm()
+
+    return render(request, 'create_review.html', {'form': form})
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Order, Review
+from .forms import ReviewForm
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def review(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+
+    if order.user != request.user:
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.user = request.user
+            review.order = order
+            review.save()
+            return redirect('review', order_id=order.id)
+    else:
+        form = ReviewForm()
+
+    # เพิ่มตรงนี้: ดึงออร์เดอร์ทั้งหมดของผู้ใช้
+    orders = Order.objects.filter(user=request.user)
+
+    return render(request, 'rentalapp/review.html', {
+        'order': order,
+        'form': form,
+        'orders': orders,  # เพิ่มใน context
+    })
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from .models import CartItem
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from .models import Rental, CartItem
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from .models import Rental, CartItem  # Import โมเดลที่เกี่ยวข้อง
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from .models import CartItem, Rental
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Cart, CartItem, Rental
+from django.utils import timezone
+
+@login_required
+def confirm_rental(request):
+    cart = get_object_or_404(Cart, user=request.user)
+    cart_items = CartItem.objects.filter(cart=cart)
+
+    if not cart_items:
+        messages.error(request, "ไม่มีสินค้าในตะกร้าสำหรับการเช่า")
+        return redirect('cart')
+
+    if request.method == 'POST':
+        # Logic การชำระเงิน (สมมติว่าสำเร็จ)
+        # ...
+
+        for item in cart_items:
+            Rental.objects.create(
+                user=request.user,
+                product=item.product,
+                size=item.size,
+                color=item.color,
+                rent_days=item.rent_days,
+                start_date=item.start_date,
+                total_price=item.total_price(),
+                created_at=timezone.now(),
+                is_payment_verified=True # หรือตามสถานะการชำระเงินจริง
+            )
+
+        # เคลียร์ตะกร้าสินค้าหลังจากสร้าง Rental แล้ว
+        cart_items.delete()
+        cart.delete()
+
+        messages.success(request, "การเช่าของคุณสำเร็จแล้ว!")
+        return redirect('rental_history')
+
+    return render(request, 'rental/confirm_rental.html') # หรือ Template อื่นๆ
+
+
+@receiver(post_save, sender=Rental)
+def clear_cart_after_rental(sender, instance, created, **kwargs):
+    if created:
+        # ลบสินค้าทั้งหมดในตะกร้าของผู้ใช้หลังจากมีการเช่า
+        CartItem.objects.filter(cart__user=instance.user).delete()
+        # ไม่ต้องสร้าง Rental ซ้ำที่นี่ Rental ถูกสร้างไปแล้ว
+
+from .models import Rental
+from django.utils import timezone
+
+def create_rental(user, product, size, color, rent_days, start_date, total_price):
+    rental = Rental.objects.create(
+        user=user,
+        product=product,
+        size=size,
+        color=color,
+        rent_days=rent_days,
+        start_date=start_date,
+        total_price=total_price,
+        created_at=timezone.now(),
+        is_payment_verified=False,  # เริ่มต้นเป็น False จนกว่าจะมีการยืนยันการชำระเงิน
+    )
+    return rental

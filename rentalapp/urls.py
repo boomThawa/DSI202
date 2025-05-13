@@ -12,9 +12,12 @@ urlpatterns = [
     path('profile/', ProfileView.as_view(), name='profile'),  # ใช้ CBV สำหรับ Profile
     path('wishlist/', views.wishlist, name='wishlist'),  # ตรวจสอบว่าฟังก์ชันนี้มีอยู่
     path('return/', views.return_outfit, name='return_outfit'),
-    path('cart/', views.view_cart, name='cart'),
+    path('cart/', views.view_cart, name='cart'),  # <-- VERY IMPORTANT LINE
     path('add-to-cart/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
     path('update-cart-quantity/', views.update_cart_quantity, name='update_cart_quantity'),
+    path('dashboard/', views.user_dashboard, name='user_dashboard'),
+
+    path('product/<int:product_id>/', views.product_detail, name='product_detail'),
 
     path('rent_now/<int:product_id>/', views.rent_now, name='rent_now'),
     path('remove-cart-item/<int:item_id>/', views.remove_cart_item, name='remove_cart_item'),
@@ -24,7 +27,11 @@ urlpatterns = [
     path('process-payment/<int:order_id>/', views.process_payment, name='process_payment'),
     path('payment-success/<int:order_id>/', views.payment_success, name='payment_success'),
     path('order/<int:order_id>/', views.order_detail, name='order_detail'),
+    path('payment-waiting/<int:order_id>/', views.payment_waiting, name='payment_waiting'),
 
+    path('product/<int:id>/', views.product_detail, name='product_detail'),
+    
+    path('api/check-payment-status/<int:order_id>/', views.check_payment_status, name='check_payment_status'),
 
 
     path('thank-you/', views.thank_you, name='thank_you'),  # เพิ่ม URL สำหรับ thank_you
@@ -35,8 +42,9 @@ urlpatterns = [
 
     # สินค้า
     path('products/', views.product_list, name='product_list'),
-    path('product/<int:product_id>/', views.product_detail, name='product_detail'),
-    path('category/', views.category_list, name='category_list'),
+
+    path('review/<int:order_id>/', views.review, name='review'),
+    path('category-images/', views.category_images, name='category_images'),
 
     # คอนเทนต์ + แฟชั่น
     path('trends/', views.trend_list, name='trend_list'),

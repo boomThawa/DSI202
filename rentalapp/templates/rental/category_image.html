@@ -1,0 +1,16 @@
+{% extends 'rental/base.html' %}
+
+{% block content %}
+<div class="grid grid-cols-3 gap-4">
+  {% for category in categories %}
+    <div class="bg-white rounded shadow p-4 text-center">
+      <h2 class="text-xl font-bold mb-2">{{ category.name }}</h2>
+      {% if category.image %}
+        <img src="{{ category.image.url }}" class="w-full h-48 object-cover rounded" alt="{{ category.name }}">
+      {% else %}
+        <p>No image available.</p>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}
