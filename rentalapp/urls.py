@@ -30,12 +30,16 @@ urlpatterns = [
     path('payment-waiting/<int:order_id>/', views.payment_waiting, name='payment_waiting'),
 
     path('product/<int:id>/', views.product_detail, name='product_detail'),
-    
+
     path('api/check-payment-status/<int:order_id>/', views.check_payment_status, name='check_payment_status'),
 
+    path('return-policy/', views.return_policy_view, name='return_policy'),
 
     path('thank-you/', views.thank_you, name='thank_you'),  # เพิ่ม URL สำหรับ thank_you
     path('history/', views.rental_history, name='rental_history'),
+
+
+    path('us/', views.us_view, name='us'),
 
     # สินค้า
     path('rental/<int:rental_id>/return/', views.return_request, name='return_request'),

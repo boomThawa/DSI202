@@ -654,11 +654,8 @@ def check_payment_status(request, order_id):
 
 @login_required
 def rental_history(request):
-    """
-    Displays the rental history for the currently logged-in user.
-    """
     rentals = Rental.objects.filter(user=request.user).order_by('-created_at')
-    # Order by created_at descending to show latest rentals first
+    print(f"Number of rentals found for user {request.user.id}: {rentals.count()}")
     return render(request, 'rentalapp/history.html', {'rentals': rentals})
 
 
@@ -840,3 +837,22 @@ def create_rental(user, product, size, color, rent_days, start_date, total_price
         is_payment_verified=False,  # เริ่มต้นเป็น False จนกว่าจะมีการยืนยันการชำระเงิน
     )
     return rental
+
+from django.shortcuts import render
+
+def return_policy_view(request):
+    return render(request, 'rentalapp/return_policy.html')
+
+from django.shortcuts import render
+
+
+    
+from django.shortcuts import render
+from .models import Order
+
+def us_view(request):
+    order_count = Order.objects.all().count()
+    context = {'order_count': order_count}
+    return render(request, 'rentalapp/us.html', context)
+from django.shortcuts import render
+from .models import Order

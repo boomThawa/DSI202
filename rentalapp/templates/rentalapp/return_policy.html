@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>นโยบายการคืนสินค้า - MindVibe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <header class="bg-pink-500 text-white py-6 shadow-md">
+        <div class="max-w-7xl mx-auto px-4">
+            <h1 class="text-3xl font-bold text-center uppercase">MindVibe</h1>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto mt-12 bg-white shadow-md rounded-lg p-8">
+        <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">นโยบายการคืนสินค้า</h2>
+
+        <p class="text-gray-700 mb-4">ที่ MindVibe เราเข้าใจดีว่าบางครั้งคุณอาจต้องการคืนสินค้า เรายินดีที่จะช่วยเหลือและทำให้กระบวนการนี้เป็นไปอย่างราบรื่น โปรดอ่านนโยบายการคืนสินค้าของเราอย่างละเอียดด้านล่างนี้</p>
+
+        <section class="mb-8">
+            <h3 class="text-xl font-semibold text-pink-500 mb-2">1. เงื่อนไขการคืนสินค้า</h3>
+            <p class="text-gray-700 mb-2">เพื่อให้การคืนสินค้าของคุณได้รับการอนุมัติ โปรดตรวจสอบให้แน่ใจว่าสินค้าเป็นไปตามเงื่อนไขดังต่อไปนี้:</p>
+            <ul class="list-disc list-inside text-gray-700">
+                <li>สินค้าอยู่ในสภาพเดิม ไม่มีการใช้งาน, ไม่เสียหาย, และอยู่ในบรรจุภัณฑ์เดิม</li>
+                <li>ป้ายสินค้าและอุปกรณ์เสริมทั้งหมดต้องยังคงติดอยู่กับสินค้า</li>
+                <li>มีใบเสร็จรับเงินหรือหลักฐานการสั่งซื้อที่ถูกต้อง</li>
+            </ul>
+        </section>
+
+        <section class="mb-8">
+            <h3 class="text-xl font-semibold text-pink-500 mb-2">2. ระยะเวลาในการคืนสินค้า</h3>
+            <p class="text-gray-700">คุณสามารถแจ้งความประสงค์ขอคืนสินค้าได้ภายใน <span class="font-semibold text-pink-500">[จำนวน]</span> วันหลังจากวันที่คุณได้รับสินค้า</p>
+        </section>
+
+        <section class="mb-8">
+            <h3 class="text-xl font-semibold text-pink-500 mb-2">3. เหตุผลในการคืนสินค้าที่ยอมรับ</h3>
+            <p class="text-gray-700">เรายินดีรับคืนสินค้าสำหรับเหตุผลดังต่อไปนี้:</p>
+            <ul class="list-disc list-inside text-gray-700">
+                <li>สินค้าไม่ตรงตามคำสั่งซื้อ</li>
+                <li>สินค้ามีตำหนิหรือชำรุด</li>
+                <li>ขนาดไม่พอดี (สำหรับสินค้าประเภทเสื้อผ้า)</li>
+                <li>ไม่พอใจกับสินค้า</li>
+            </ul>
+        </section>
+
+        <section class="mb-8">
+            <h3 class="text-xl font-semibold text-pink-500 mb-2">4. ขั้นตอนการคืนสินค้า</h3>
+            <p class="text-gray-700 mb-2">โปรดทำตามขั้นตอนเหล่านี้เพื่อดำเนินการคืนสินค้า:</p>
+            <ol class="list-decimal list-inside text-gray-700">
+                <li><strong>แจ้งความประสงค์:</strong> ไปที่หน้า <a href="{% url 'rental_history' %}" class="text-blue-500 hover:underline">ประวัติการเช่า</a> และคลิกที่ปุ่ม "แจ้งคืนสินค้า" สำหรับรายการที่คุณต้องการคืน</li>
+                <li><strong>กรอกแบบฟอร์ม (ถ้ามี):</strong> กรอกข้อมูลในแบบฟอร์มขอคืนสินค้าให้ครบถ้วน (เช่น เหตุผลในการคืน)</li>
+                <li><strong>รอการติดต่อกลับ:</strong> ทีมงานของเราจะติดต่อกลับภายใน <span class="font-semibold text-pink-500">[เวลา]</span> เพื่อแจ้งขั้นตอนการจัดส่งคืนสินค้า</li>
+                <li><strong>จัดส่งสินค้าคืน:</strong> จัดส่งสินค้าคืนตามวิธีการที่ทีมงานของเราแจ้งให้ทราบ</li>
+                <li><strong>ตรวจสอบและอนุมัติ:</strong> เมื่อสินค้าถูกส่งคืนถึงเรา ทีมงานจะตรวจสอบสภาพสินค้า</li>
+                <li><strong>ดำเนินการคืนเงิน:</strong> หากสินค้าเป็นไปตามเงื่อนไข เราจะดำเนินการคืนเงินตามช่องทางที่คุณชำระเงินภายใน <span class="font-semibold text-pink-500">[จำนวน]</span> วันทำการ</li>
+            </ol>
+        </section>
+
+        <section class="mb-8">
+            <h3 class="text-xl font-semibold text-pink-500 mb-2">5. การคืนเงิน</h3>
+            <p class="text-gray-700 mb-2">เมื่อการคืนสินค้าของคุณได้รับการอนุมัติ เราจะดำเนินการคืนเงินเต็มจำนวน (ไม่รวมค่าจัดส่งเดิม) ไปยังช่องทางที่คุณชำระเงิน การดำเนินการคืนเงินอาจใช้เวลา <span class="font-semibold text-pink-500">[จำนวน]</span> วันทำการ ขึ้นอยู่กับนโยบายของธนาคารของคุณ</p>
+        </section>
+
+        <section class="mb-8">
+            <h3 class="text-xl font-semibold text-pink-500 mb-2">6. สินค้าที่ไม่สามารถคืนได้</h3>
+            <p class="text-gray-700">สินค้าบางประเภทอาจไม่สามารถคืนได้ โปรดตรวจสอบรายละเอียดในหน้ารายละเอียดสินค้า</p>
+            <ul class="list-disc list-inside text-gray-700">
+                <li>สินค้าที่ถูกใช้งานแล้วและไม่เป็นไปตามสภาพเดิม</li>
+                <li>สินค้าที่เสียหายจากความผิดพลาดของผู้ใช้งาน</li>
+                <li>สินค้าลดราคาพิเศษ (ตามเงื่อนไขที่ระบุ)</li>
+            </ul>
+        </section>
+
+        <section class="mt-8 text-center">
+            <p class="text-gray-600">หากคุณมีคำถามเพิ่มเติมเกี่ยวกับนโยบายการคืนสินค้าของเรา โปรดติดต่อเราได้ที่:</p>
+            <p class="text-pink-500 font-semibold"><a href="{% url 'us' %}" class="hover:underline">หน้าติดต่อเรา</a></p>
+        </section>
+    </main>
+
+    <footer class="text-center text-sm text-gray-500 py-6 mt-12">
+        &copy; 2025 MindVibe. All rights reserved.
+    </footer>
+
+</body>
+</html>

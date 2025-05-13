@@ -1,153 +1,47 @@
-{% load static %}
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rental History - MindVibe</title>
-  <link rel="stylesheet" href="{% static 'style.css' %}">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Unbounded', sans-serif;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>ประวัติการเช่า - MindVibe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; }
+    </style>
 </head>
-<body class="bg-white text-gray-900">
+<body class="bg-gray-100 text-gray-800">
+    <header class="bg-pink-500 text-white py-6 shadow-md">
+        <div class="max-w-7xl mx-auto px-4">
+            <h1 class="text-3xl font-bold text-center uppercase">MindVibe</h1>
+        </div>
+    </header>
 
-  <nav class="bg-white text-gray-900 shadow-md sticky top-0 z-50 border-b border-gray-300">
-      <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
-          <div class="flex items-center space-x-8">
-              <span class="text-2xl font-bold text-black uppercase tracking-wide">MindVibe</span>
-              <a href="{% url 'home' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Studio</a>
-              <a href="{% url 'product_list' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Drop</a>
-              <a href="{% url 'trend_list' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Trends</a>
-              <a href="{% url 'rental_history' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">rentalhistory</a>
+    <main class="max-w-3xl mx-auto mt-12 bg-white shadow-md rounded-lg p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">ประวัติการเช่า</h2>
 
-          </div>
+        {% if rentals %}
+            <ul class="space-y-4">
+                {% for rental in rentals %}
+                    <li class="border rounded-md p-4">
+                        <p class="font-semibold text-pink-500">order {{ rental.order.id }}</p>
+                        <p>สินค้า: {{ rental.product.name }} ({{ rental.size }}, {{ rental.color }})</p>
+                        <p>วันที่เช่า: {{ rental.start_date|date:"d M Y" }}</p>
+                        <p>จำนวนวันเช่า: {{ rental.rent_days }} วัน</p>
+                        <p>ราคารวม: ฿{{ rental.total_price }}</p>
+                        <p>สถานะ: {{ rental.get_status_display }}</p> 
+                        {% if rental.status != 'returned' and rental.status != 'pending_return' %}
+                            <a href="{% url 'return_request' rental.id %}" class="text-yellow-500 hover:underline ml-4">แจ้งคืนสินค้า</a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-gray-600">ไม่มีประวัติการเช่า</p>
+        {% endif %}
+    </main>
 
-          <div class="flex items-center space-x-4">
-              <form action="{% url 'product_list' %}" method="get" class="flex items-center space-x-2">
-                  <input type="text" name="search"
-                      class="p-2 border border-gray-300 rounded-md bg-gray-100 placeholder-gray-500 text-sm"
-                      placeholder="Search products..." value="{{ request.GET.search }}" />
-                  <button type="submit" class="text-pink-500 text-lg">🔍</button>
-              </form>
-
-              <a href="{% url 'cart' %}" class="text-gray-900 hover:text-pink-500 text-xl">🛒</a>
-              <a href="{% url 'wishlist' %}" class="text-gray-900 hover:text-pink-500 text-xl">❤️</a>
-          </div>
-      </div>
-  </nav>
-
-  <div class="max-w-7xl mx-auto px-4 py-10">
-      <h1 class="text-4xl font-extrabold text-gray-900 mb-8 text-center uppercase tracking-wide">
-          Rental History
-      </h1>
-
-      {% if orders %}
-      <div class="overflow-x-auto">
-          <table class="min-w-full bg-white shadow-md rounded-lg">
-              <thead class="bg-gray-50">
-                  <tr>
-                      <th class="py-3 px-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                          Order ID
-                      </th>
-                      <th class="py-3 px-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                          Total Price
-                      </th>
-                      <th class="py-3 px-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                          Created At
-                      </th>
-                      <th class="py-3 px-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                          Status
-                      </th>
-                      <th class="py-3 px-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                          Items
-                      </th>
-                  </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200">
-                  {% for order in orders %}
-                  <tr>
-                      <td class="py-4 px-6 whitespace-nowrap">
-                          {{ order.order_id }}
-                      </td>
-                      <td class="py-4 px-6 whitespace-nowrap">
-                          ฿{{ order.total_price }}
-                      </td>
-                      <td class="py-4 px-6 whitespace-nowrap">
-                          {{ order.created_at }}
-                      </td>
-                      <td class="py-4 px-6 whitespace-nowrap">
-                          {{ order.status }}
-                      </td>
-                      <td class="py-4 px-6 whitespace-nowrap">
-                          {% for item in order.items.all %}
-                          <div class="flex items-center space-x-3 py-2">
-                              <a href="{% url 'product_detail' item.product.id %}"
-                                  class="font-medium text-pink-500 hover:underline">
-                                  {{ item.product.name }}
-                              </a>
-                              <span class="text-gray-700">
-                                  ({{ item.quantity }} x ฿{{ item.product.price }})
-                              </span>
-                          </div>
-                          {% endfor %}
-                      </td>
-                  </tr>
-                  {% endfor %}
-              </tbody>
-          </table>
-      </div>
-      {% else %}
-      <p class="text-gray-500 text-center">You have no order history yet.</p>
-      {% endif %}
-  </div>
-
-  <footer class="bg-white text-neutral-900 py-8 border-t border-zinc-200">
-      <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-3 gap-10">
-          <div>
-              <h4 class="text-xl font-bold uppercase tracking-wide mb-4 text-black">MindVibe</h4>
-              <p class="text-sm text-zinc-500 leading-relaxed">
-                  Where street meets style — premium rentals with statement energy.
-              </p>
-          </div>
-          <div>
-              <h4 class="text-xl font-bold uppercase mb-4 text-black">Explore</h4>
-              <ul class="space-y-2 text-sm">
-                  <li><a href="#" class="hover:text-pink-500 transition">Drop</a></li>
-                  <li><a href="#" class="hover:text-pink-500 transition">Capsules</a></li>
-                  <li><a href="#" class="hover:text-pink-500 transition">Ritual</a></li>
-              </ul>
-          </div>
-          <div>
-              <h4 class="text-xl font-bold uppercase mb-4 text-black">Connect</h4>
-              <p class="text-sm text-zinc-500">Line: @mindvibe</p>
-              <p class="text-sm text-zinc-500">Email: hello@mindvibe.com</p>
-              <div class="mt-4 flex space-x-4">
-                  <a href="#" class="hover:text-pink-500 transition">IG</a>
-                  <a href="#" class="hover:text-pink-500 transition">TikTok</a>
-                  <a href="#" class="hover:text-pink-500 transition">Pinterest</a>
-              </div>
-              <div class="container">
-                  {% if error_message %}
-                  <div class="error-message">
-                      <h2>Oops! Something went wrong</h2>
-                      <p>{{ error_message }}</p>
-                  </div>
-                  {% endif %}
-
-              </div>
-
-          </div>
-          <div class="text-center text-xs text-zinc-400 mt-12">
-              © 2025 MindVibe — All styles, all vibes.
-          </div>
-      </div>
-  </footer>
-
+    <footer class="text-center text-sm text-gray-500 py-6 mt-12">
+        &copy; 2025 MindVibe. All rights reserved.
+    </footer>
 </body>
 </html>

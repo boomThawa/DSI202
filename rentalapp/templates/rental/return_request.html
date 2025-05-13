@@ -1,14 +1,78 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>แจ้งคืนสินค้า - MindVibe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
 
-{% block content %}
-<h1>Return Request</h1>
-<p><strong>Rental ID:</strong> {{ rental.id }}</p>
-<p><strong>Product:</strong> {{ rental.product.name }}</p>
-<p><strong>Rent Days:</strong> {{ rental.rent_days }}</p>
-<p><strong>Total Price:</strong> ${{ rental.total_price }}</p>
+    <header class="bg-pink-500 text-white py-6 shadow-md">
+        <div class="max-w-7xl mx-auto px-4">
+            <h1 class="text-3xl font-bold text-center uppercase">MindVibe</h1>
+        </div>
+    </header>
 
-<form method="post">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-primary">Submit Return Request</button>
-</form>
-{% endblock %}
+    <<main class="max-w-3xl mx-auto mt-12 bg-white shadow-md rounded-lg p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">แจ้งความประสงค์ขอคืนสินค้า</h2>
+    
+        <div class="mb-6 border-b pb-4">
+            <h3 class="text-lg font-semibold text-pink-500 mb-2">รายการสินค้าที่ต้องการคืน</h3>
+            <p><strong>สินค้า:</strong> {{ rental.product.name }} ({{ rental.size }}, {{ rental.color }})</p>
+            {% if rental.product.image_url %}
+                <img src="{{ rental.product.image_url }}" alt="{{ rental.product.name }}" class="max-w-sm rounded-md shadow-md mt-2">
+            {% endif %}
+            <p><strong>วันที่เช่า:</strong> {{ rental.start_date|date:"d M Y" }}</p>
+            <p><strong>จำนวนวันที่เช่า:</strong> {{ rental.rent_days }} วัน</p>
+            <p class="text-gray-700">คุณต้องการแจ้งคืนสินค้าสำหรับรายการเช่าหมายเลข: <span class="font-semibold text-pink-500">#{{ rental.id }}</span> หรือไม่?</p>
+        </div>
+    
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">เหตุผลในการคืนสินค้า (ไม่บังคับ)</h3>
+            <form>
+                <select class="w-full border rounded-md shadow-sm focus:border-pink-500 focus:ring-pink-500">
+                    <option value="">-- เลือกเหตุผล --</option>
+                    <option value="not_satisfied">ไม่พอใจกับสินค้า</option>
+                    <option value="wrong_size">ขนาดไม่พอดี</option>
+                    <option value="defective">สินค้าชำรุด</option>
+                    <option value="other">อื่นๆ</option>
+                </select>
+                <textarea class="w-full border rounded-md shadow-sm focus:border-pink-500 focus:ring-pink-500 mt-2" rows="3" placeholder="ระบุเหตุผลเพิ่มเติม (ถ้ามี)"></textarea>
+            </form>
+        </div>
+    
+        <div class="mb-6 border-b pb-4">
+            <h3 class="text-md font-semibold text-gray-800 mb-2">เงื่อนไขการคืนสินค้า</h3>
+            <p class="text-sm text-gray-600">คุณสามารถแจ้งคืนสินค้าได้ภายใน [X] วันหลังจากได้รับสินค้า สินค้าต้องอยู่ในสภาพเดิม...</p>
+            <a href="{% url 'return_policy' %}" class="text-blue-500 hover:underline text-sm">อ่านนโยบายการคืนสินค้าฉบับเต็ม</a>
+        </div>
+    
+        <form method="post">
+            {% csrf_token %}
+            <div class="flex justify-center space-x-4">
+                <button type="submit" class="bg-green-500 text-white px-6 py-3 rounded-lg font-semibold shadow hover:bg-green-600 transition">
+                    ยืนยันการขอคืนสินค้า
+                </button>
+                <a href="{% url 'rental_history' %}" class="bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold shadow hover:bg-gray-400 transition">
+                    ยกเลิก
+                </a>
+            </div>
+        </form>
+    
+        <div class="mt-6 text-center text-sm text-gray-500">
+            หากมีข้อสงสัยเพิ่มเติม กรุณาติดต่อ <a href="{% url 'us' %}" class="text-pink-500 hover:underline">ติดต่อเรา</a>
+        </div>
+    </main>
+
+    <footer class="text-center text-sm text-gray-500 py-6 mt-12">
+        &copy; 2025 MindVibe. All rights reserved.
+    </footer>
+
+</body>
+</html>

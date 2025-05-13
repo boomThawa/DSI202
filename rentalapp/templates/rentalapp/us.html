@@ -1,0 +1,340 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>MindVibe</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .fancy-title {
+      text-align: center;
+      padding: 40px 20px 20px;
+    }
+
+    .fancy-title h1 {
+      font-size: 8rem;
+      font-weight: 800;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      font-family: 'Prompt', sans-serif;
+      background: linear-gradient(90deg, #d8d2d2, #f0efef, #042707);
+      background-size: 200% auto;
+      color: transparent;
+      background-clip: text;
+      -webkit-background-clip: text;
+      animation: shimmer 2s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 200% center;
+      }
+      100% {
+        background-position: -200% center;
+      }
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Prompt', sans-serif;
+      background-color: #000;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 60px;
+      flex-wrap: wrap;
+      padding: 20px;
+      flex-grow: 1;
+    }
+
+    .earth {
+      width: 500px;
+      height: 500px;
+      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/The_Earth_seen_from_Apollo_17.jpg/600px-The_Earth_seen_from_Apollo_17.jpg');
+      background-size: cover;
+      background-position: center;
+      border-radius: 50%;
+      animation: spin 25s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .stats-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 40px;
+      max-width: 400px;
+    }
+
+    .stat-item {
+      text-align: left;
+    }
+
+    .stat-label {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #4CAF50;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 3rem;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    /* Navbar */
+    nav {
+      width: 100%;
+    }
+
+    nav .max-w-7xl {
+      max-width: 7xl;
+      margin: auto;
+    }
+
+    nav .text-gray-900 {
+      color: #333;
+    }
+
+/* About Section */
+.about-section {
+  background-color: #000000;
+  padding: 60px 20px;
+  text-align: center;
+  font-family: 'Arial', sans-serif;
+  position: relative;
+  overflow: hidden; /* ซ่อนผีเสื้อที่บินออกไปจากขอบ */
+}
+
+.butterfly {
+  position: absolute;
+  width: 50px;
+  height: auto;
+  animation: fly 5s infinite;
+}
+
+@keyframes fly {
+  0% {
+    top: 0;
+    left: 0;
+  }
+  50% {
+    top: 50%;
+    left: 50%;
+  }
+  100% {
+    top: 0;
+    left: 100%;
+  }
+}
+
+/* เพิ่มการเคลื่อนไหวให้กับผีเสื้อ */
+.butterfly-container {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.butterfly {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  animation: fly 10s linear infinite;
+}
+
+
+/* Other styles */
+.about-title {
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #f7f7f7;
+}
+
+.about-description {
+  font-size: 18px;
+  line-height: 1.6;
+  color: #b6c8b7;
+  max-width: 800px;
+  margin: 0 auto 40px;
+}
+
+.highlight {
+  color: #dcebdc;
+  font-weight: bold;
+}
+
+.about-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.content-item {
+  background-color: #222322;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(229, 218, 218, 0.1);
+}
+
+.content-item h3 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 15px;
+}
+
+.content-item p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #a1ada7;
+}
+
+.content-item ul {
+  padding-left: 20px;
+  font-size: 16px;
+  color: #a1ada7;
+}
+
+.about-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr; /* ค่าเริ่มต้น  */
+}
+
+@media (min-width: 600px) {
+  .about-content {
+    grid-template-columns: 1fr 1fr; /* สำหรับหน้าจอขนาดกลาง (แท็บเล็ต) จัดเรียงเป็น 2 คอลัมน์ */
+  }
+}
+
+@media (min-width: 1024px) {
+  .about-content {
+    grid-template-columns: 1fr; /* สำหรับหน้าจอขนาดใหญ่ (เดสก์ท็อป) จัดเรียงเป็น 3 คอลัมน์ */
+  }
+}
+
+
+
+
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="bg-white text-gray-900 shadow-md sticky top-0 z-50 border-b border-gray-300">
+    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+      <!-- Left Navigation Links -->
+      <div class="flex items-center space-x-8">
+        <span class="text-2xl font-bold text-black uppercase tracking-wide">MindVibe</span>
+        <a href="{% url 'home' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Studio</a>
+        <a href="{% url 'product_list' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Drop</a>
+        <a href="{% url 'trend_list' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Trends</a>
+        <a href="{% url 'rental_history' %}" class="text-gray-900 hover:text-pink-500 text-lg font-semibold">Rental History</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Fancy MindVibe Heading -->
+  <div class="fancy-title">
+    <h1>MindVibe</h1>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- 🌍 โลกหมุนใหญ่มาก -->
+    <div class="earth"></div>
+
+    <!-- ข้อมูลสถิติ -->
+    <div class="stats-container">
+      <div class="stat-item">
+        <div class="stat-label">จำนวนออเดอร์ทั้งหมด</div>
+        <div class="stat-value" id="orderCount">{{ order_count }}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">เสื้อผ้ารีไซเคิลโดยประมาณ</div>
+        <div class="stat-value" id="recycledClothes"></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">ลดคาร์บอนโดยประมาณ</div>
+        <div class="stat-value" id="carbonReduction"></div>
+      </div>
+    </div>
+  </div>
+<!-- About Section -->
+<section class="about-section">
+    <h2 class="about-title">เกี่ยวกับเรา - MindVibe</h2>
+    <p class="about-description">
+      <span class="highlight">MindVibe</span> เกิดขึ้นจากความเชื่อมั่นในพลังของการเปลี่ยนแปลงที่ดีและยั่งยืน เรามุ่งมั่นที่จะออกแบบและสร้างสรรค์แฟชั่นที่ไม่เพียงแค่สวยงาม แต่ยังมีความรับผิดชอบต่อโลกใบนี้ เพราะเราเชื่อว่า การเลือกแฟชั่นที่ยั่งยืนสามารถสร้างผลกระทบที่ดีต่อทั้งสังคมและสิ่งแวดล้อม
+    </p>
+  
+    <!-- ผีเสื้อ SVG ที่จะเคลื่อนไหว -->
+    <div class="butterfly-container">
+        <img class="butterfly" src="{% static 'butterfly-svgrepo-com.svg' %}" alt="Butterfly">
+    </div>
+
+
+    <div class="about-content">
+      <div class="content-item">
+        <h3>แรงบันดาลใจจากผีเสื้อ</h3>
+        <p>ผีเสื้อไม่ได้เป็นแค่สัญลักษณ์ของความสวยงาม แต่ยังเป็นตัวแทนของการเปลี่ยนแปลงและการพัฒนาอย่างต่อเนื่อง ตั้งแต่การเริ่มต้นในดักแด้ไปสู่การบินอันอิสระ ผีเสื้อสะท้อนถึงการเติบโตที่ไม่หยุดยั้ง ซึ่งเรานำแรงบันดาลใจนี้มาสู่การสร้างสรรค์แฟชั่นที่เติบโตไปพร้อมกับโลกในแบบที่ยั่งยืน</p>
+      </div>
+      <div class="content-item">
+        <h3>ภารกิจของเรา</h3>
+        <p>ที่ MindVibe เราเชื่อว่าการเปลี่ยนแปลงคือโอกาส เราจึงมุ่งเน้นไปที่การส่งเสริมแฟชั่นที่ไม่เพียงแต่ตอบสนองความต้องการด้านความสวยงาม แต่ยังเป็นทางเลือกที่รับผิดชอบต่อสิ่งแวดล้อม การเลือกใช้วัสดุที่ยั่งยืนและการเช่าเสื้อผ้าแทนการซื้อใหม่ คือหนึ่งในแนวทางที่เรานำเสนอ เพื่อช่วยลดขยะสิ่งทอและส่งเสริม Circular Fashion</p>
+      </div>
+     
+    
+  </section>
+  
+
+  <script>
+    const orderCountElement = document.getElementById('orderCount');
+    const recycledClothesElement = document.getElementById('recycledClothes');
+    const carbonReductionElement = document.getElementById('carbonReduction');
+
+    const orderCount = parseInt(orderCountElement.textContent);
+    const recycledClothes = orderCount * 1.5;
+    const carbonReduction = orderCount * 2.3;
+
+    function animateCountUp(element, finalValue, suffix = '', duration = 1000, decimal = false) {
+      let start = 0;
+      const startTime = performance.now();
+
+      function update(time) {
+        const progress = Math.min((time - startTime) / duration, 1);
+        let value = progress * finalValue;
+        value = decimal ? value.toFixed(1) : Math.floor(value);
+        element.textContent = `${value}${suffix}`;
+        if (progress < 1) requestAnimationFrame(update);
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    animateCountUp(recycledClothesElement, recycledClothes, ' ชิ้น', 1500);
+    animateCountUp(carbonReductionElement, carbonReduction, ' kg CO2', 2000);
+  </script>
+</body>
+</html>
