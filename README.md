@@ -1,8 +1,11 @@
 # MindVibe - แพลตฟอร์มเช่าเสื้อผ้าออนไลน์เพื่อแฟชั่นที่ยั่งยืน (dsi205)
 
 **ผู้จัดทำ:** ธวพร ตรีเนตร 6624650021
+
 **รหัสวิชา:** dsi202
+
 **My clip** https://youtu.be/2-UpvCCFWDI?si=1g51693WxK4aIz_-
+
 **Repository:** `https://github.com/yourusername/dsi205` 
 
 ## 1. บทคัดย่อ (Abstract)
